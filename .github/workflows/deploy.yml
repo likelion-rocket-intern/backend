@@ -80,6 +80,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             mkdir -p /dockerProjects/resume_matching/backend
-            curl -o /dockerProjects/resume_matching/backend/zero_downtime_deploy.py https://raw.githubusercontent.com/${{ github.repository }}/main/backend/infraScript/zero_downtime_deploy.py 
+            curl -o /dockerProjects/resume_matching/backend/zero_downtime_deploy.py https://raw.githubusercontent.com/${{ github.repository }}/main/infraScript/zero_downtime_deploy.py 
             chmod +x /dockerProjects/resume_matching/backend/zero_downtime_deploy.py
             python3 /dockerProjects/resume_matching/backend/zero_downtime_deploy.py 
