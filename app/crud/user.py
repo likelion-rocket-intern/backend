@@ -21,7 +21,6 @@ class CRUDUser:
         db.refresh(user)
         return user
 
-
 user = CRUDUser()
 
 
