@@ -7,6 +7,7 @@ from pydantic import (
     BeforeValidator,
     HttpUrl,
     PostgresDsn,
+    RedisDsn,
     computed_field,
     model_validator,
 )
@@ -73,6 +74,22 @@ class Settings(BaseSettings):
             host=self.POSTGRES_SERVER,
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
+        )
+
+    # Redis Settings
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
+    REDIS_PASSWORD: str = ""
+
+    @computed_field
+    @property
+    def REDIS_BROKER_URL(self) -> RedisDsn:
+        return MultiHostUrl.build(
+            scheme="redis",
+            host=self.REDIS_HOST,
+            port=self.REDIS_PORT,
+            path=str(self.REDIS_DB)
         )
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
