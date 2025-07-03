@@ -7,23 +7,6 @@ router = APIRouter(tags=["jinro"])
 async def get_jinro():
     return {"message": "Hello, Jinro!"}
 
-# 진로심리검사 목록 요청 (비동기)
-@router.get("/tests")
-async def get_psychological_tests():
-    api_key = "878211ba94ee6b8314869638fe245b6a"  # 실제 발급받은 API 키 사용
-    url = "https://www.career.go.kr/inspct/openapi/v2/tests"
-    params = {"apikey": api_key}
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url, params=params)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return {
-            "error": "API 요청 실패",
-            "status_code": response.status_code,
-            "detail": response.text
-        }
-
 # 입력한 값으로 문항 요청
 # 커리어넷 심리검사 문항 요청 
 @router.get("/test-questions")
