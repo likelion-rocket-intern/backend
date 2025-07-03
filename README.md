@@ -42,3 +42,11 @@ alembic upgrade head
 # 5. 서버실행
 uvicorn app.main:app --reload
 
+# 6. dramatiq 워커실행
+./scripts/worker-start.sh
+or
+dramatiq app.worker.resume_analysis app.worker.__init__ --processes 2 --threads 4
+
+# 6. 도커 빌드 & 실행
+docker build -t ll-rocket-backend . && docker run ll-rocket-backend
+
