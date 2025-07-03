@@ -1,5 +1,5 @@
 # backend
-
+dev
 uvicorn app.main:app --reload
 
 cd ../backend && curl http://localhost:8000/api/v1/openapi.json > openapi.json
