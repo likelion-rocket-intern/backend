@@ -72,7 +72,7 @@ class ServiceManager:
             f"docker run -d --name={name} --network=resume_matching "
             f"--network-alias=resume_matching "
             f"--restart unless-stopped -p {port}:18000 -e TZ=Asia/Seoul "
-            f"--pull always ghcr.io/kknaks/wine_log")
+            f"--pull always ghcr.io/likelion-rocket-intern/ai-resume")
 
     def _switch_port(self) -> None:
         # Socat 포트를 전환하는 함수
