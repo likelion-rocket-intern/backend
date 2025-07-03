@@ -40,4 +40,10 @@ COPY ./app /app/app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
+# Make the script executable
+RUN chmod +x /app/scripts/prestart.sh
+
+# Set entrypoint to run prestart.sh and then start the application
+ENTRYPOINT ["/app/scripts/prestart.sh"]
+
 CMD ["fastapi", "run", "--workers", "4", "app/main.py"]
