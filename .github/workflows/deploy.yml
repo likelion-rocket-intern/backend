@@ -3,14 +3,14 @@ on:
   push:
     paths:
       - '.github/workflows/**'
-      - 'backend/app/**'
-      - 'backend/infraScript/**'
-      - 'backend/scripts/**'
-      - 'backend/pyproject.toml'
-      - 'backend/uv.lock'
-      - 'backend/alembic.ini'
-      - 'backend/Dockerfile'
-      - 'backend/README.md'
+      - 'app/**'
+      - 'infraScript/**'
+      - 'scripts/**'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - 'alembic.ini'
+      - 'Dockerfile'
+      - 'README.md'
     branches:
       - 'main'
 jobs:
@@ -63,7 +63,7 @@ jobs:
       - name: 빌드 앤 푸시
         uses: docker/build-push-action@v3
         with:
-          context: ./backend
+          context: .
           push: true
           tags: |
             ghcr.io/${{ env.OWNER_LC }}/ai-resume:${{ needs.makeTagAndRelease.outputs.tag_name }},
