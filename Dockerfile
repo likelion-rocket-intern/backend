@@ -49,4 +49,4 @@ RUN chmod +x /app/scripts/prestart.sh
 # Set entrypoint to run prestart.sh and then start the application
 ENTRYPOINT ["/app/scripts/prestart.sh"]
 
-CMD ["fastapi", "run", "--workers", "4", "app/main.py"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "18000", "--workers", "4"]
