@@ -3,6 +3,7 @@
 import os
 import requests
 import subprocess
+import sys
 import time
 from typing import Dict, Optional
 
@@ -119,9 +120,6 @@ class ServiceManager:
             print(f"ERROR: {self.next_name}가 {max_retries*self.sleep_duration}초 이내에 시작되지 않았습니다.")
             return
         
-        # Dramatiq 워커 실행 (기존 컨테이너에서)
-        print(f"Dramatiq 워커 실행 완료: {self.next_name}")
-        
         self._switch_port()
 
         if self.current_name is not None:
@@ -133,3 +131,4 @@ class ServiceManager:
 if __name__ == "__main__":
     manager = ServiceManager()
     manager.update_service()
+    sys.exit(0)
