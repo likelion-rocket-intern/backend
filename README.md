@@ -50,3 +50,5 @@ dramatiq app.worker.resume_analysis app.worker.__init__ --processes 2 --threads 
 # 6. 도커 빌드 & 실행
 docker build -t ll-rocket-backend . && docker run ll-rocket-backend
 
+<!-- resumes = db.query(Resume).options(selectinload(Resume.user)).all()
+user = db.query(User).options(selectinload(User.resumes)).first() -->

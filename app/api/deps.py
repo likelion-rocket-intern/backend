@@ -50,17 +50,17 @@ def get_current_user(
             detail="Not authenticated",
         )
     
-    # print("=== Debug Token Info ===")
-    # print(f"Access Token: {access_token}")
-    # print(f"Refresh Token: {refresh_token}")
-    # print("=====================")
+    print("=== Debug Token Info ===")
+    print(f"Access Token: {access_token}")
+    print(f"Refresh Token: {refresh_token}")
+    print("=====================")
         
     try:
         return security.verify_token(access_token, session)
     except HTTPException as e:
-        # print(f"=== Token Verification Error ===")
-        # print(f"Error: {str(e.detail)}")
-        # print("===============================")
+        print(f"=== Token Verification Error ===")
+        print(f"Error: {str(e.detail)}")
+        print("===============================")
         if e.status_code == status.HTTP_403_FORBIDDEN and refresh_token:
             try:
                 # Validate refresh token

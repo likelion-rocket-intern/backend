@@ -1,6 +1,6 @@
 from sqlmodel import Session
 from app.core import security
-from app.crud import user
+from app.crud import user_crud
 from app.models.user import User
 from app.schemas.auth import Token, UserInfo
 from app.service.kakao_auth import KakaoAuth
@@ -26,7 +26,7 @@ class AuthService:
             raise ValueError("Failed to get user info")
 
         # DB에서 유저 찾기 또는 생성
-        db_user = user.get_by_social_info(
+        db_user = user_crud.get_by_social_info(
             db, 
             social_type="kakao",
             social_id=str(kakao_data["id"])  # 카카오에서 받은 ID 그대로 사용
@@ -42,7 +42,7 @@ class AuthService:
                 profile_image=kakao_data["properties"].get("profile_image"),
             )
 
-            db_user = user.create_from_social(
+            db_user = user_crud.create_from_social(
                 db, user=new_user
             )
 

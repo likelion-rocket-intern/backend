@@ -26,6 +26,6 @@ class CRUDUser:
         db.refresh(user)
         return user
 
-user = CRUDUser()
+user_crud = CRUDUser()
 
 

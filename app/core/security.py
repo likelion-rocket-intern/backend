@@ -11,7 +11,7 @@ from app.core.config import settings
 from app.schemas.auth import UserInfo, TokenPayload
 from app.models import User
 from sqlmodel import Session
-from app.crud.user import user as crud_user
+from app.crud import user_crud
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -62,7 +62,7 @@ def verify_token(token: str, session: Session) -> User:
             detail=f"Could not validate credentials: {str(e)}",
         )
     
-    user = crud_user.get(session, id=user_info.id)
+    user = user_crud.get(session, id=user_info.id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     if not user.is_active:

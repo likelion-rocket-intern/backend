@@ -1,6 +1,7 @@
 from datetime import datetime
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy.sql import func
+from typing import List
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
@@ -23,5 +24,4 @@ class User(SQLModel, table=True):
         sa_column_kwargs={"onupdate": func.now()}
     )
 
-    class Config:
-        table = True
+    resumes: List["Resume"] = Relationship(back_populates="user")

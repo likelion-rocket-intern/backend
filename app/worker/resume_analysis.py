@@ -1,11 +1,12 @@
 import dramatiq
 import logging
 import json
-import uuid
 from app.core.redis import get_redis_client
 from app.schemas.status import TaskStatus
 from app.core.db import engine
 from sqlmodel import Session
+from app.models.resume import Resume
+from app.crud import resume_crud
 import os
 
 logger = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ def get_task_status(message_id: str) -> dict:
 def send_resume_analysis(
     file_path: str,
     filename: str,
-    user_id: str,
+    user_id: int,
     task_id: str,
 ) -> None:
     try:
@@ -53,6 +54,18 @@ def send_resume_analysis(
             # 1. 파일 저장
             # 2. 분석 수행
             # 3. 결과 저장 (session 사용)
+
+            resume_count = len(resume_crud.get_by_user_id(session, user_id))
+            version = f"v_{resume_count + 1}.0"
+
+            new_resume = Resume(
+                user_id=user_id,
+                file_path=file_path,
+                version=version,
+                analysis_result="Sample analysis result"
+            )
+
+            resume_crud.create(session, resume=new_resume)
             
             # 분석 완료 후 상태 업데이트
             result = {
