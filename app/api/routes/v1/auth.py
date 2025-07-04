@@ -8,8 +8,7 @@ router = APIRouter(tags=["auth"])
 
 @router.get("/kakao/login")
 async def kakao_login() -> KakaoLoginResponse:
-    """카카오 로그인 URL 반환"""
-    authorization_url = auth_service.get_kakao_login_url()
+    authorization_url = auth_service.get_social_login_url()
     return KakaoLoginResponse(authorization_url=authorization_url)
 
 @router.get("/kakao/callback")
@@ -20,7 +19,7 @@ async def kakao_callback(
 ) -> UserResponse:
     """카카오 로그인 콜백 처리"""
     try:
-        token, user = await auth_service.process_kakao_login(session, code)
+        token, user = await auth_service.process_social_login(session, code)
         
         # access 토큰을 쿠키에 설정
         response.set_cookie(
