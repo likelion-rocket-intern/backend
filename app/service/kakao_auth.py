@@ -1,8 +1,6 @@
 from app.core.config import settings
 import httpx
 
-from app.schemas.auth import KakaoUserInfo
-
 class KakaoAuth:
     def __init__(self):
         self.client_id = settings.KAKAO_CLIENT_ID
@@ -41,17 +39,11 @@ class KakaoAuth:
                 return token_data.get("access_token")
         return None
     
-    async def get_user_info(self, access_token: str) -> KakaoUserInfo | None:
+    async def get_user_info(self, access_token: str) -> dict | None:
         """카카오 사용자 정보 얻기"""
         headers = {"Authorization": f"Bearer {access_token}"}
         async with httpx.AsyncClient() as client:
             response = await client.get(self.user_info_url, headers=headers)
             if response.status_code == 200:
-                data = response.json()
-                return KakaoUserInfo(
-                    id=str(data["id"]),  # kakao id is int, convert to str
-                    nickname=data["properties"]["nickname"],
-                    email=data["kakao_account"].get("email"),
-                    profile_image=data["properties"].get("profile_image")
-                )
+                return response.json()  # 카카오 응답 데이터를 그대로 반환
             return None

@@ -1,21 +1,14 @@
 import dramatiq
 import logging
-from typing import Union
 import json
-from redis import Redis
-from enum import Enum
+import uuid
+from app.core.redis import get_redis_client
+from app.schemas.status import TaskStatus
+import os
 
 logger = logging.getLogger(__name__)
 
-# Redis 클라이언트 설정
-redis_client = Redis(host='localhost', port=6379, db=0)
-
-class TaskStatus(str, Enum):
-    PENDING = "pending"
-    PROCESSING = "processing"
-    COMPLETED = "completed"
-    FAILED = "failed"
-
+redis_client = get_redis_client()
 
 def update_task_status(message_id: str, status: TaskStatus, result: dict = None):
     """작업 상태를 Redis에 업데이트"""
@@ -37,30 +30,20 @@ def get_task_status(message_id: str) -> dict:
 
 @dramatiq.actor(queue_name="resume_analysis", max_retries=3)
 def send_resume_analysis(
-    file_content: Union[str, bytes],
+    file_path: str,
     filename: str,
     user_id: str,
+    task_id: str,
 ) -> None:
-    """
-    이력서 분석을 수행하는 워커
-    
-    Args:
-        file_content: 이력서 파일 내용 (텍스트 또는 바이너리)
-        filename: 파일 이름
-        user_id: 사용자 ID
-    """
-    message_id = dramatiq.get_message_id()
     try:
-        update_task_status(message_id, TaskStatus.PROCESSING)
+        update_task_status(task_id, TaskStatus.PROCESSING)
         logger.info(f"Starting resume analysis for user: {user_id}, file: {filename}")
         
-        # 파일 내용이 바이너리인 경우 처리
-        if isinstance(file_content, bytes):
-            try:
-                file_content = file_content.decode('utf-8')
-            except UnicodeDecodeError:
-                logger.warning(f"Binary file detected for {filename}")
-                # TODO: 바이너리 파일 처리 로직 구현
+        # 파일 처리
+        with open(file_path, 'rb') as f:
+            # 여기서 파일 분석 작업 수행
+            # ...
+            pass
         
         # TODO: 실제 분석 로직 구현
         # 1. 파일 저장
@@ -73,10 +56,12 @@ def send_resume_analysis(
             "user_id": user_id,
             "analysis_result": "Sample analysis result"  # TODO: 실제 분석 결과로 대체
         }
-        update_task_status(message_id, TaskStatus.COMPLETED, result)
+        update_task_status(task_id, TaskStatus.COMPLETED, result)
+
+        # os.remove(file_path)
         
         logger.info(f"Resume analysis completed for user: {user_id}, file: {filename}")
     except Exception as e:
         logger.error(f"Resume analysis failed for user: {user_id}, file: {filename}: {str(e)}")
-        update_task_status(message_id, TaskStatus.FAILED, {"error": str(e)})
+        update_task_status(task_id, TaskStatus.FAILED, {"error": str(e)})
         raise 

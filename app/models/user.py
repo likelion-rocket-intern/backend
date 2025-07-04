@@ -6,7 +6,8 @@ class User(SQLModel, table=True):
     __tablename__ = "users"
     
     id: int = Field(default=None, primary_key=True, index=True)
-    social_id: str = Field(unique=True, index=True)  # Format: "{platform}_{id}"
+    social_type: str = Field(index=True)  # "kakao", "google", etc.
+    social_id: str = Field(index=True)    # The ID from the social platform
     email: str | None = Field(default=None)
     nickname: str
     profile_image: str | None = Field(default=None)
@@ -21,3 +22,6 @@ class User(SQLModel, table=True):
         default=None,
         sa_column_kwargs={"onupdate": func.now()}
     )
+
+    class Config:
+        table = True
