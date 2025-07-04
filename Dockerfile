@@ -4,6 +4,9 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app/
 
+# Install supervisor
+RUN apt-get update && apt-get install -y supervisor
+
 # Install uv
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#installing-uv
 COPY --from=ghcr.io/astral-sh/uv:0.5.11 /uv /uvx /bin/
@@ -33,6 +36,9 @@ COPY ./scripts /app/scripts
 
 COPY ./pyproject.toml ./uv.lock ./alembic.ini /app/
 
+# Copy supervisor configuration
+COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
 # Copy .env file
 COPY ./.env /app/.env
 
@@ -43,10 +49,8 @@ COPY ./app /app/app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync
 
-# Make the script executable
-RUN chmod +x /app/scripts/prestart.sh
+# Make the scripts executable
+RUN chmod +x /app/scripts/prestart.sh /app/scripts/worker-start.sh
 
-# Set entrypoint to run prestart.sh and then start the application
-ENTRYPOINT ["/app/scripts/prestart.sh"]
-
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "18000", "--workers", "4"]
+# Set entrypoint to run supervisord
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
