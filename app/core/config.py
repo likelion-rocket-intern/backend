@@ -82,6 +82,9 @@ class Settings(BaseSettings):
     REDIS_DB: int = 0
     REDIS_PASSWORD: str = ""
 
+    # Embeddings Model 설정
+    EMBBEDING_MODEL : str = ""
+
     @computed_field
     @property
     def REDIS_BROKER_URL(self) -> RedisDsn:
