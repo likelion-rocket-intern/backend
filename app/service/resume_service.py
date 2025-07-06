@@ -12,6 +12,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from docx import Document as DocxDocument
 from langchain_community.document_loaders import PyMuPDFLoader, Docx2txtLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from app.utils.storage import delete_resume
 
 
 class ResumeService:
@@ -63,6 +64,11 @@ class ResumeService:
         resume_id: int
     ) -> None:
         resume = self.get_by_id(db=db, resume_id=resume_id)
+        
+        # 스토리지에서 파일 삭제
+        delete_resume(resume.file_path)
+        
+        # 이력서 삭제 (cascade로 인해 관련 임베딩도 자동 삭제됨)
         if resume:
             db.delete(resume)
             db.commit()

@@ -21,4 +21,7 @@ class Resume(SQLModel, table=True):
   )
   
   user: Optional["User"] = Relationship(back_populates="resumes")
-  resume_embeddings: List["ResumeEmbedding"] = Relationship(back_populates="resume")
+  resume_embeddings: List["ResumeEmbedding"] = Relationship(
+      back_populates="resume",
+      sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+  )

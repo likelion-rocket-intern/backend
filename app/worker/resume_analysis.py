@@ -8,6 +8,7 @@ from sqlmodel import Session
 from app.models.resume import Resume
 from app.service.resume_service import resume_service
 from app.crud import resume_crud
+from app.utils.storage import download_resume
 import os
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,7 @@ def send_resume_analysis(
     user_id: int,
     task_id: str,
 ) -> None:
+    temp_file_path = None
     try:
         # user_id를 정수형으로 명시적 변환
         user_id = int(user_id)
@@ -62,8 +64,13 @@ def send_resume_analysis(
 
             resume = resume_crud.create(session, resume=new_resume)
 
+            # 1.5. 파일 다운로드
+            temp_file_path = download_resume(filename)
+            if not temp_file_path:
+                raise Exception("Failed to download file from storage")
+
             # 2. 파일 파싱 & 청킹
-            chunks = resume_service.parse_and_chunk_resume(file_path, filename)
+            chunks = resume_service.parse_and_chunk_resume(temp_file_path, filename)
             update_task_status(task_id, TaskResumeStatus.PARSING, {"message": "파일 파싱 중입니다."})
             
             # 3. 청크 임베딩
@@ -81,11 +88,16 @@ def send_resume_analysis(
                 "analysis_result": "Sample analysis result"  # TODO: 실제 분석 결과로 대체
             }
             update_task_status(task_id, TaskResumeStatus.COMPLETED, result)
-
-            # os.remove(file_path)
         
         logger.info(f"Resume analysis completed for user: {user_id}, file: {filename}")
     except Exception as e:
         logger.error(f"Resume analysis failed for user: {user_id}, file: {filename}: {str(e)}")
         update_task_status(task_id, TaskResumeStatus.FAILED, {"error": str(e)})
         raise 
+    finally:
+        # 임시 파일 정리
+        if temp_file_path and os.path.exists(temp_file_path):
+            try:
+                os.unlink(temp_file_path)
+            except Exception as e:
+                logger.error(f"Failed to delete temporary file {temp_file_path}: {str(e)}") 

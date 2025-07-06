@@ -113,5 +113,15 @@ class Settings(BaseSettings):
         self._check_default_secret("POSTGRES_PASSWORD", self.POSTGRES_PASSWORD)
         return self
 
+    # NCP Settings
+    NCP_ACCESS_KEY: str
+    NCP_SECRET_KEY: str
+    NCP_BUCKET_NAME: str
+    NCP_REGION: str
+    
+    @computed_field
+    @property
+    def NCP_ENDPOINT(self) -> str:
+        return f"https://{self.NCP_BUCKET_NAME}.{self.NCP_REGION}.ncloudstorage.com"
 
 settings = Settings()  # type: ignore

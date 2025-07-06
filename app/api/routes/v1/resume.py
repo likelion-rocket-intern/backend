@@ -10,13 +10,9 @@ from datetime import datetime
 import uuid
 from app.schemas.resume import AnalysisResponse, TaskStatusResponse, ResumeDetailResponse, ResumeListResponse
 from app.schemas.status import TaskStatus
-
+from app.utils import storage
 
 router = APIRouter(tags=["resume"])
-
-UPLOAD_DIR = Path("uploads/resumes")
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-
 
 @router.post("/analysis")
 async def upload_resume(
@@ -27,26 +23,27 @@ async def upload_resume(
     try:
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
         filename = f"{current_user.id}_{timestamp}_{file.filename}"
-        file_path = UPLOAD_DIR / filename
-
-        content = await file.read()
-        with open(file_path, "wb") as f:
-            f.write(content)
         
         # Generate a unique task ID
         task_id = str(uuid.uuid4())
-
-        # parse_resume = resume_service.process_resume_with_embeddings(file_path, file.filename)
-        # result = resume_service.process_and_save_resume(
-        #     db=session,
-        #     file_path=str(file_path),
-        #     filename=file.filename,
-        #     resume_id=1  # 테스트용
-        # )
         
+        # Read file content
+        content = await file.read()
+        
+        # Upload directly to NCP Object Storage
+        from io import BytesIO
+        file_obj = BytesIO(content)
+        file_url = storage.upload_resume(file_obj, filename)
+        if not file_url:
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to upload file to storage"
+            )
+        
+        # Send for analysis
         send_resume_analysis.send(
-            file_path=str(file_path),
-            filename=file.filename,
+            file_path=file_url,  # Now using the complete URL
+            filename=filename,
             user_id=current_user.id,
             task_id=task_id,
         )
@@ -59,9 +56,6 @@ async def upload_resume(
         )
     
     except Exception as e:
-        # 에러 발생 시 저장된 파일 삭제
-        if 'file_path' in locals() and file_path.exists():
-            file_path.unlink()
         raise HTTPException(
             status_code=500,
             detail=f"Failed to process resume: {str(e)}"
