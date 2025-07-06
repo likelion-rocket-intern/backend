@@ -52,3 +52,11 @@ docker build -t ll-rocket-backend . && docker run ll-rocket-backend
 
 <!-- resumes = db.query(Resume).options(selectinload(Resume.user)).all()
 user = db.query(User).options(selectinload(User.resumes)).first() -->
+
+<!-- db에 vector 확장 프로그램 설치 -->
+<!-- docker exec -it my_postgres bash -c "apt-get install -y postgresql-17-pgvector" -->
+<!-- docker exec -it my_postgres psql -U myuser -d ll_rocket -c "CREATE EXTENSION IF NOT EXISTS vector;" -->
+
+<!-- 실행중인 ubicorn 확인 -->
+<!-- ps aux | grep "uvicorn\|python" | grep -v grep -->
+<!-- pkill -f "uvicorn app.main:app" -->

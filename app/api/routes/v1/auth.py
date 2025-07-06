@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException, Query
-from fastapi.responses import Response
+from fastapi.responses import Response, RedirectResponse
 from app.api.deps import SessionDep, CurrentUser
 from app.schemas.auth import KakaoLoginResponse, UserResponse
 from app.service.auth import auth_service
+from app.core.config import settings
 
 router = APIRouter(tags=["auth"])
 
@@ -16,12 +17,13 @@ async def kakao_callback(
     session: SessionDep,
     response: Response,
     code: str = Query(..., description="카카오 인증 코드")
-) -> UserResponse:
+) -> Response:
     """카카오 로그인 콜백 처리"""
     try:
         token, user = await auth_service.process_social_login(session, code)
         
         # access 토큰을 쿠키에 설정
+        response = RedirectResponse(url=f"{settings.FRONTEND_HOST}")
         response.set_cookie(
             key="access_token",
             value=token.access_token,
@@ -41,10 +43,7 @@ async def kakao_callback(
             max_age=7 * 24 * 60 * 60  # 7일
         )
         
-        return UserResponse(
-            nickname=user.nickname,
-            email=user.email
-        )
+        return response
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

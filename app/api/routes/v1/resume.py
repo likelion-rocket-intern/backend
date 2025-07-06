@@ -35,6 +35,14 @@ async def upload_resume(
         
         # Generate a unique task ID
         task_id = str(uuid.uuid4())
+
+        # parse_resume = resume_service.process_resume_with_embeddings(file_path, file.filename)
+        # result = resume_service.process_and_save_resume(
+        #     db=session,
+        #     file_path=str(file_path),
+        #     filename=file.filename,
+        #     resume_id=1  # 테스트용
+        # )
         
         send_resume_analysis.send(
             file_path=str(file_path),

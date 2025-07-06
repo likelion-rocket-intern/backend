@@ -1,7 +1,11 @@
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
 from sqlalchemy.sql import func
-from typing import Optional
+from typing import Optional, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .resume_embedding import ResumeEmbedding
+    from .user import User
 
 class Resume(SQLModel, table=True):
   __tablename__ = "resumes"
@@ -17,3 +21,4 @@ class Resume(SQLModel, table=True):
   )
   
   user: Optional["User"] = Relationship(back_populates="resumes")
+  resume_embeddings: List["ResumeEmbedding"] = Relationship(back_populates="resume")
