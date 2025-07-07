@@ -1,0 +1,381 @@
+name, skill
+서버 개발자,Java
+서버 개발자,Spring Boot
+서버 개발자,Node.js
+서버 개발자,Express.js
+서버 개발자,Python
+서버 개발자,Django
+서버 개발자,FastAPI
+서버 개발자,Nginx
+서버 개발자,Redis
+서버 개발자,MySQL
+소프트웨어 엔지니어,Python
+소프트웨어 엔지니어,Java
+소프트웨어 엔지니어,C++
+소프트웨어 엔지니어,Git
+소프트웨어 엔지니어,Docker
+소프트웨어 엔지니어,Kubernetes
+소프트웨어 엔지니어,REST API
+소프트웨어 엔지니어,Linux
+소프트웨어 엔지니어,SQL
+소프트웨어 엔지니어,AWS
+자바 개발자,Java
+자바 개발자,Spring Boot
+자바 개발자,Spring Framework
+자바 개발자,JPA
+자바 개발자,Hibernate
+자바 개발자,Maven
+자바 개발자,Gradle
+자바 개발자,MyBatis
+자바 개발자,Tomcat
+자바 개발자,Oracle
+프론트엔드 개발자,React
+프론트엔드 개발자,Vue.js
+프론트엔드 개발자,TypeScript
+프론트엔드 개발자,JavaScript
+프론트엔드 개발자,Next.js
+프론트엔드 개발자,Redux
+프론트엔드 개발자,Tailwind CSS
+프론트엔드 개발자,SASS
+프론트엔드 개발자,Webpack
+프론트엔드 개발자,Jest
+웹 개발자,HTML
+웹 개발자,CSS
+웹 개발자,JavaScript
+웹 개발자,React
+웹 개발자,Vue.js
+웹 개발자,Node.js
+웹 개발자,Express.js
+웹 개발자,Django
+웹 개발자,PHP
+웹 개발자,MySQL
+파이썬 개발자,Python
+파이썬 개발자,Django
+파이썬 개발자,FastAPI
+파이썬 개발자,Flask
+파이썬 개발자,Pandas
+파이썬 개발자,NumPy
+파이썬 개발자,Celery
+파이썬 개발자,SQLAlchemy
+파이썬 개발자,Pytest
+파이썬 개발자,Jupyter Notebook
+C C++ 개발자,C
+C C++ 개발자,C++
+C C++ 개발자,STL
+C C++ 개발자,Boost
+C C++ 개발자,Qt
+C C++ 개발자,CMake
+C C++ 개발자,GTest
+C C++ 개발자,OpenCV
+C C++ 개발자,Embedded Linux
+C C++ 개발자,Visual Studio
+머신러닝 엔지니어,Python
+머신러닝 엔지니어,TensorFlow
+머신러닝 엔지니어,PyTorch
+머신러닝 엔지니어,scikit-learn
+머신러닝 엔지니어,Keras
+머신러닝 엔지니어,Jupyter
+머신러닝 엔지니어,Pandas
+머신러닝 엔지니어,NumPy
+머신러닝 엔지니어,MLflow
+머신러닝 엔지니어,XGBoost
+데이터 엔지니어,Python
+데이터 엔지니어,SQL
+데이터 엔지니어,Airflow
+데이터 엔지니어,Spark
+데이터 엔지니어,Hadoop
+데이터 엔지니어,Kafka
+데이터 엔지니어,AWS Redshift
+데이터 엔지니어,dbt
+데이터 엔지니어,Snowflake
+데이터 엔지니어,Docker
+DevOps 시스템 관리자,Docker
+DevOps 시스템 관리자,Kubernetes
+DevOps 시스템 관리자,Jenkins
+DevOps 시스템 관리자,Ansible
+DevOps 시스템 관리자,Terraform
+DevOps 시스템 관리자,AWS
+DevOps 시스템 관리자,Linux
+DevOps 시스템 관리자,Prometheus
+DevOps 시스템 관리자,Grafana
+DevOps 시스템 관리자,GitLab CI
+시스템 네트워크 관리자,Linux
+시스템 네트워크 관리자,Windows Server
+시스템 네트워크 관리자,Cisco
+시스템 네트워크 관리자,VMware
+시스템 네트워크 관리자,Ansible
+시스템 네트워크 관리자,Nagios
+시스템 네트워크 관리자,Zabbix
+시스템 네트워크 관리자,Python
+시스템 네트워크 관리자,Bash
+시스템 네트워크 관리자,TCP/IP
+안드로이드 개발자,Kotlin
+안드로이드 개발자,Java
+안드로이드 개발자,Android SDK
+안드로이드 개발자,Jetpack Compose
+안드로이드 개발자,MVVM
+안드로이드 개발자,Retrofit
+안드로이드 개발자,Dagger/Hilt
+안드로이드 개발자,Room
+안드로이드 개발자,Firebase
+안드로이드 개발자,Gradle
+Node.js 개발자,Node.js
+Node.js 개발자,Express.js
+Node.js 개발자,NestJS
+Node.js 개발자,TypeScript
+Node.js 개발자,MongoDB
+Node.js 개발자,Redis
+Node.js 개발자,Jest
+Node.js 개발자,PM2
+Node.js 개발자,Socket.io
+Node.js 개발자,GraphQL
+QA 테스트 엔지니어,Selenium
+QA 테스트 엔지니어,JUnit
+QA 테스트 엔지니어,Pytest
+QA 테스트 엔지니어,Postman
+QA 테스트 엔지니어,Jenkins
+QA 테스트 엔지니어,TestNG
+QA 테스트 엔지니어,Cypress
+QA 테스트 엔지니어,Appium
+QA 테스트 엔지니어,Allure
+QA 테스트 엔지니어,Git
+개발 매니저,Jira
+개발 매니저,Confluence
+개발 매니저,Git
+개발 매니저,Jenkins
+개발 매니저,Docker
+개발 매니저,AWS
+개발 매니저,Slack
+개발 매니저,Notion
+개발 매니저,Trello
+개발 매니저,SonarQube
+데이터 사이언티스트,Python
+데이터 사이언티스트,R
+데이터 사이언티스트,SQL
+데이터 사이언티스트,Pandas
+데이터 사이언티스트,NumPy
+데이터 사이언티스트,scikit-learn
+데이터 사이언티스트,TensorFlow
+데이터 사이언티스트,PyTorch
+데이터 사이언티스트,Tableau
+데이터 사이언티스트,Jupyter Notebook
+하드웨어 엔지니어,C
+하드웨어 엔지니어,C++
+하드웨어 엔지니어,Verilog
+하드웨어 엔지니어,VHDL
+하드웨어 엔지니어,FPGA
+하드웨어 엔지니어,PCB Design
+하드웨어 엔지니어,Altium Designer
+하드웨어 엔지니어,Embedded Linux
+하드웨어 엔지니어,UART
+하드웨어 엔지니어,SPI
+임베디드 개발자,C
+임베디드 개발자,C++
+임베디드 개발자,Embedded Linux
+임베디드 개발자,RTOS
+임베디드 개발자,ARM
+임베디드 개발자,UART
+임베디드 개발자,SPI
+임베디드 개발자,I2C
+임베디드 개발자,FreeRTOS
+임베디드 개발자,Keil
+기술지원,Windows
+기술지원,Linux
+기술지원,Active Directory
+기술지원,VMware
+기술지원,Citrix
+기술지원,PowerShell
+기술지원,Python
+기술지원,Jira
+기술지원,SCCM
+기술지원,Office 365
+빅데이터 엔지니어,Hadoop
+빅데이터 엔지니어,Spark
+빅데이터 엔지니어,Hive
+빅데이터 엔지니어,HBase
+빅데이터 엔지니어,Kafka
+빅데이터 엔지니어,Flink
+빅데이터 엔지니어,Scala
+빅데이터 엔지니어,Python
+빅데이터 엔지니어,Airflow
+빅데이터 엔지니어,AWS EMR
+프로덕트 매니저,Jira
+프로덕트 매니저,Confluence
+프로덕트 매니저,Figma
+프로덕트 매니저,Notion
+프로덕트 매니저,Slack
+프로덕트 매니저,Google Analytics
+프로덕트 매니저,Mixpanel
+프로덕트 매니저,Trello
+프로덕트 매니저,Miro
+프로덕트 매니저,SQL
+iOS 개발자,Swift
+iOS 개발자,Objective-C
+iOS 개발자,Xcode
+iOS 개발자,UIKit
+iOS 개발자,SwiftUI
+iOS 개발자,CoreData
+iOS 개발자,Combine
+iOS 개발자,Alamofire
+iOS 개발자,Firebase
+iOS 개발자,MVVM
+.NET 개발자,C#
+.NET 개발자,.NET Core
+.NET 개발자,ASP.NET
+.NET 개발자,Entity Framework
+.NET 개발자,LINQ
+.NET 개발자,Azure
+.NET 개발자,Visual Studio
+.NET 개발자,Blazor
+.NET 개발자,NUnit
+.NET 개발자,SQL Server
+크로스플랫폼 앱 개발자,Flutter
+크로스플랫폼 앱 개발자,Dart
+크로스플랫폼 앱 개발자,React Native
+크로스플랫폼 앱 개발자,JavaScript
+크로스플랫폼 앱 개발자,TypeScript
+크로스플랫폼 앱 개발자,Xamarin
+크로스플랫폼 앱 개발자,Ionic
+크로스플랫폼 앱 개발자,Cordova
+크로스플랫폼 앱 개발자,Redux
+크로스플랫폼 앱 개발자,Firebase
+블록체인 플랫폼 엔지니어,Solidity
+블록체인 플랫폼 엔지니어,Ethereum
+블록체인 플랫폼 엔지니어,Web3.js
+블록체인 플랫폼 엔지니어,Truffle
+블록체인 플랫폼 엔지니어,Hardhat
+블록체인 플랫폼 엔지니어,Go
+블록체인 플랫폼 엔지니어,Rust
+블록체인 플랫폼 엔지니어,Hyperledger
+블록체인 플랫폼 엔지니어,IPFS
+블록체인 플랫폼 엔지니어,Metamask
+영상,음성 엔지니어,C++
+영상,음성 엔지니어,Python
+영상,음성 엔지니어,OpenCV
+영상,음성 엔지니어,FFmpeg
+영상,음성 엔지니어,GStreamer
+영상,음성 엔지니어,TensorFlow
+영상,음성 엔지니어,PyTorch
+영상,음성 엔지니어,WebRTC
+영상,음성 엔지니어,CUDA
+영상,음성 엔지니어,ALSA
+웹 퍼블리셔,HTML
+웹 퍼블리셔,CSS
+웹 퍼블리셔,JavaScript
+웹 퍼블리셔,jQuery
+웹 퍼블리셔,Sass
+웹 퍼블리셔,Bootstrap
+웹 퍼블리셔,Photoshop
+웹 퍼블리셔,Figma
+웹 퍼블리셔,Zeplin
+웹 퍼블리셔,Git
+DBA,Oracle
+DBA,MySQL
+DBA,PostgreSQL
+DBA,SQL Server
+DBA,MongoDB
+DBA,Redis
+DBA,SQL
+DBA,PL/SQL
+DBA,AWS RDS
+DBA,DataGuard
+PHP 개발자,PHP
+PHP 개발자,Laravel
+PHP 개발자,Symfony
+PHP 개발자,CodeIgniter
+PHP 개발자,MySQL
+PHP 개발자,Apache
+PHP 개발자,Nginx
+PHP 개발자,Composer
+PHP 개발자,PHPUnit
+PHP 개발자,Redis
+ERP전문가,SAP
+ERP전문가,Oracle ERP
+ERP전문가,ABAP
+ERP전문가,MS Dynamics
+ERP전문가,NetSuite
+ERP전문가,Odoo
+ERP전문가,SQL
+ERP전문가,Power BI
+ERP전문가,Python
+ERP전문가,Excel
+그래픽스 엔지니어,C++
+그래픽스 엔지니어,OpenGL
+그래픽스 엔지니어,DirectX
+그래픽스 엔지니어,Vulkan
+그래픽스 엔지니어,Unity
+그래픽스 엔지니어,Unreal Engine
+그래픽스 엔지니어,GLSL
+그래픽스 엔지니어,HLSL
+그래픽스 엔지니어,CUDA
+그래픽스 엔지니어,Blender
+CTO Chief Technology Officer,AWS
+CTO Chief Technology Officer,Azure
+CTO Chief Technology Officer,GCP
+CTO Chief Technology Officer,Docker
+CTO Chief Technology Officer,Kubernetes
+CTO Chief Technology Officer,Python
+CTO Chief Technology Officer,Java
+CTO Chief Technology Officer,React
+CTO Chief Technology Officer,Git
+CTO Chief Technology Officer,Terraform
+VR 엔지니어,Unity
+VR 엔지니어,Unreal Engine
+VR 엔지니어,C#
+VR 엔지니어,C++
+VR 엔지니어,OpenXR
+VR 엔지니어,WebXR
+VR 엔지니어,Blender
+VR 엔지니어,Oculus SDK
+VR 엔지니어,SteamVR
+VR 엔지니어,Three.js
+BI 엔지니어,Power BI
+BI 엔지니어,Tableau
+BI 엔지니어,Qlik
+BI 엔지니어,SQL
+BI 엔지니어,Python
+BI 엔지니어,ETL
+BI 엔지니어,DAX
+BI 엔지니어,SSIS
+BI 엔지니어,Looker
+BI 엔지니어,Excel
+RPA 엔지니어,UiPath
+RPA 엔지니어,Automation Anywhere
+RPA 엔지니어,Blue Prism
+RPA 엔지니어,Python
+RPA 엔지니어,Power Automate
+RPA 엔지니어,Selenium
+RPA 엔지니어,VBA
+RPA 엔지니어,SQL
+RPA 엔지니어,REST API
+RPA 엔지니어,Git
+테크니컬 라이터,Markdown
+테크니컬 라이터,Confluence
+테크니컬 라이터,Git
+테크니컬 라이터,JIRA
+테크니컬 라이터,MS Word
+테크니컬 라이터,Google Docs
+테크니컬 라이터,DITA
+테크니컬 라이터,HTML
+테크니컬 라이터,Snagit
+테크니컬 라이터,Figma
+CIO Chief Information Officer,AWS
+CIO Chief Information Officer,Azure
+CIO Chief Information Officer,GCP
+CIO Chief Information Officer,SAP
+CIO Chief Information Officer,Oracle
+CIO Chief Information Officer,Salesforce
+CIO Chief Information Officer,Power BI
+CIO Chief Information Officer,Tableau
+CIO Chief Information Officer,Python
+CIO Chief Information Officer,SQL
+루비온레일즈 개발자,Ruby
+루비온레일즈 개발자,Ruby on Rails
+루비온레일즈 개발자,PostgreSQL
+루비온레일즈 개발자,MySQL
+루비온레일즈 개발자,Redis
+루비온레일즈 개발자,Sidekiq
+루비온레일즈 개발자,RSpec
+루비온레일즈 개발자,Capistrano
+루비온레일즈 개발자,JavaScript
+루비온레일즈 개발자,Docker
