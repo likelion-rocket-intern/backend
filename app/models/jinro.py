@@ -13,9 +13,10 @@ class Jinro(SQLModel, table=True):
 
     id: int = Field(default=None, primary_key=True, index=True)
     user_id: int = Field(foreign_key="users.id", index=True)
-    version: int
+    version: str
     # json타입을 명시
     test_result: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
+    # 근데 test가 굳이 있어야 하나? 여러 종류일지도 몰라서 그런가?
     test: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     created_at: datetime = Field(
         default_factory=func.now,
@@ -24,3 +25,5 @@ class Jinro(SQLModel, table=True):
     
     # Relationship
     user: Optional["User"] = Relationship(back_populates="jinros")
+
+

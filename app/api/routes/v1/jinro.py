@@ -1,11 +1,9 @@
 from fastapi import APIRouter
 import httpx
-from fastapi import Request
 from fastapi import status
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from typing import Optional
-from bs4 import BeautifulSoup
+
+from app.api.deps import SessionDep, CurrentUser
 
 router = APIRouter(tags=["jinro"])
 
@@ -46,7 +44,7 @@ class JinroTestReportRequest(BaseModel):
 # 검사 결과 요청 (비동기)
 @router.post("/test-report-v1")
 async def post_test_report_v1(body: JinroTestReportRequest):
-    url = "https://www.career.go.kr/inspct/openapi/test/report"
+    url = "httpsq://www.career.go.kr/inspct/openapi/test/report"
     headers = {"Content-Type": "application/json"}
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json=body.dict(), headers=headers)
