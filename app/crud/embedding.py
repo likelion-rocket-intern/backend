@@ -32,3 +32,5 @@ class CRUDEmbedding:
         if obj:
             db.delete(obj)
             db.commit()
+            
+embedding_crud = CRUDEmbedding()
