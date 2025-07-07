@@ -4,10 +4,6 @@ from datetime import datetime
 
 import jwt
 from fastapi import Depends, HTTPException, status, Cookie, Response
-<<<<<<< HEAD
-=======
-from fastapi.security import OAuth2PasswordBearer
->>>>>>> feature/ai-backup
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
 from sqlmodel import Session
@@ -18,42 +14,20 @@ from app.core.db import engine
 from app.models import TokenPayload, User
 from app.schemas.auth import UserInfo
 
-<<<<<<< HEAD
-=======
-reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/login/access-token"
-)
-
-
->>>>>>> feature/ai-backup
 def get_db() -> Generator[Session, None, None]:
     with Session(engine) as session:
         yield session
 
-<<<<<<< HEAD
 async def get_access_token(access_token: str | None = Cookie(None)) -> str | None:
     return access_token
-=======
-
-SessionDep = Annotated[Session, Depends(get_db)]
-TokenDep = Annotated[str, Depends(reusable_oauth2)]
-
->>>>>>> feature/ai-backup
 
 async def get_refresh_token(refresh_token: str | None = Cookie(None)) -> str | None:
     return refresh_token
 
-<<<<<<< HEAD
 SessionDep = Annotated[Session, Depends(get_db)]
 AccessTokenDep = Annotated[str | None, Depends(get_access_token)]
 RefreshTokenDep = Annotated[str | None, Depends(get_refresh_token)]
 
-=======
-
-RefreshTokenDep = Annotated[str | None, Depends(get_refresh_token)]
-
-
->>>>>>> feature/ai-backup
 def create_new_access_token(user: User) -> str:
     # Convert User model to UserInfo schema
     user_info = UserInfo(
@@ -64,7 +38,6 @@ def create_new_access_token(user: User) -> str:
     )
     return security.create_access_token(user_info=user_info)
 
-<<<<<<< HEAD
 def get_current_user(
     session: SessionDep, 
     access_token: AccessTokenDep,
@@ -88,18 +61,6 @@ def get_current_user(
         print(f"=== Token Verification Error ===")
         print(f"Error: {str(e.detail)}")
         print("===============================")
-=======
-
-def get_current_user(
-    session: SessionDep, 
-    token: TokenDep, 
-    refresh_token: RefreshTokenDep,
-    response: Response
-) -> User:
-    try:
-        return security.verify_token(token, session)
-    except HTTPException as e:
->>>>>>> feature/ai-backup
         if e.status_code == status.HTTP_403_FORBIDDEN and refresh_token:
             try:
                 # Validate refresh token
@@ -123,15 +84,8 @@ def get_current_user(
                 )
         raise e
 
-<<<<<<< HEAD
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
-=======
-
-CurrentUser = Annotated[User, Depends(get_current_user)]
-
-
->>>>>>> feature/ai-backup
 def get_current_active_superuser(current_user: CurrentUser) -> User:
     if not current_user.is_superuser:
         raise HTTPException(
