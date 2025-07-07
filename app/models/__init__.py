@@ -1,5 +1,7 @@
 from sqlmodel import SQLModel
 from app.models.user import User
-from app.schemas.auth import TokenPayload
+from app.models.resume import Resume
+from app.models.resume_embedding import ResumeEmbedding
+from app.models.embedding import Embedding
 
-__all__ = ["User", "TokenPayload", "SQLModel"]
+__all__ = ["User", "Resume", "ResumeEmbedding", "Embedding", "SQLModel"]
