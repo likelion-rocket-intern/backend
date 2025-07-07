@@ -1,11 +1,7 @@
 from datetime import datetime
 from sqlmodel import SQLModel, Field, Relationship
 from sqlalchemy.sql import func
-from typing import List, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from .resume import Resume
-    from .jinro import Jinro
+from typing import List
 
 class User(SQLModel, table=True):
     __tablename__ = "users"
