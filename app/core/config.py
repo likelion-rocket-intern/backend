@@ -36,7 +36,11 @@ class Settings(BaseSettings):
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
+<<<<<<< HEAD
     FRONTEND_HOST: str = "http://localhost:3000"
+=======
+    FRONTEND_HOST: str = "http://localhost:5173"
+>>>>>>> feature/ai-backup
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
     # OAuth2 Settings
@@ -82,6 +86,12 @@ class Settings(BaseSettings):
     REDIS_DB: int = 0
     REDIS_PASSWORD: str = ""
 
+<<<<<<< HEAD
+=======
+    # Embeddings Model 설정
+    EMBBEDING_MODEL : str = ""
+
+>>>>>>> feature/ai-backup
     @computed_field
     @property
     def REDIS_BROKER_URL(self) -> RedisDsn:
@@ -91,10 +101,13 @@ class Settings(BaseSettings):
             port=self.REDIS_PORT,
             path=str(self.REDIS_DB)
         )
+<<<<<<< HEAD
     
     # OpenAI Settings
     OPENAI_API_KEY: str = ""
     OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
+=======
+>>>>>>> feature/ai-backup
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
@@ -113,6 +126,7 @@ class Settings(BaseSettings):
         self._check_default_secret("POSTGRES_PASSWORD", self.POSTGRES_PASSWORD)
         return self
 
+<<<<<<< HEAD
     # NCP Settings
     NCP_ACCESS_KEY: str
     NCP_SECRET_KEY: str
@@ -123,5 +137,7 @@ class Settings(BaseSettings):
     @property
     def NCP_ENDPOINT(self) -> str:
         return f"https://{self.NCP_BUCKET_NAME}.{self.NCP_REGION}.ncloudstorage.com"
+=======
+>>>>>>> feature/ai-backup
 
 settings = Settings()  # type: ignore
