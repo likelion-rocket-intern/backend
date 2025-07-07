@@ -27,6 +27,7 @@ async def get_test_questions_v1(current_user:CurrentUser):
     if response.status_code == 200:
         # 여기서 유저의 정보를 받자
         current_user_id = current_user.id
+        # 그리고 유저의 정보와 함께 
         return response.json()
     else:
         return {
