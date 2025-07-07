@@ -35,8 +35,9 @@ def get_task_status(message_id: str) -> dict:
 
 @dramatiq.actor(queue_name="resume_analysis", max_retries=3)
 def send_resume_analysis(
-    file_path: str,
-    filename: str,
+    file_url: str,
+    original_filename: str,
+    upload_filename: str,
     user_id: int,
     task_id: str,
 ) -> None:
@@ -46,7 +47,7 @@ def send_resume_analysis(
         user_id = int(user_id)
         
         update_task_status(task_id, TaskResumeStatus.PROCESSING)
-        logger.info(f"Starting resume analysis for user: {user_id}, file: {filename}")
+        logger.info(f"Starting resume analysis for user: {user_id}, file: {original_filename}")
         
         # Worker 내부에서 새로운 DB 세션 생성
         with Session(engine) as session:
@@ -57,7 +58,9 @@ def send_resume_analysis(
 
             new_resume = Resume(
                 user_id=user_id,
-                file_path=file_path,
+                file_url=file_url,
+                original_filename=original_filename,
+                upload_filename=upload_filename,
                 version=version,
                 analysis_result="Sample analysis result"
             )
@@ -65,12 +68,12 @@ def send_resume_analysis(
             resume = resume_crud.create(session, resume=new_resume)
 
             # 1.5. 파일 다운로드
-            temp_file_path = download_resume(filename)
+            temp_file_path = download_resume(upload_filename)
             if not temp_file_path:
                 raise Exception("Failed to download file from storage")
 
             # 2. 파일 파싱 & 청킹
-            chunks = resume_service.parse_and_chunk_resume(temp_file_path, filename)
+            chunks = resume_service.parse_and_chunk_resume(temp_file_path, upload_filename, original_filename)
             update_task_status(task_id, TaskResumeStatus.PARSING, {"message": "파일 파싱 중입니다."})
             
             # 3. 청크 임베딩
@@ -83,15 +86,15 @@ def send_resume_analysis(
 
             # 분석 완료 후 상태 업데이트
             result = {
-                "filename": filename,
+                "filename": original_filename,
                 "user_id": user_id,
                 "analysis_result": "Sample analysis result"  # TODO: 실제 분석 결과로 대체
             }
             update_task_status(task_id, TaskResumeStatus.COMPLETED, result)
         
-        logger.info(f"Resume analysis completed for user: {user_id}, file: {filename}")
+        logger.info(f"Resume analysis completed for user: {user_id}, file: {original_filename}")
     except Exception as e:
-        logger.error(f"Resume analysis failed for user: {user_id}, file: {filename}: {str(e)}")
+        logger.error(f"Resume analysis failed for user: {user_id}, file: {original_filename}: {str(e)}")
         update_task_status(task_id, TaskResumeStatus.FAILED, {"error": str(e)})
         raise 
     finally:

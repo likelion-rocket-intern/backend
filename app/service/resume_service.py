@@ -95,8 +95,8 @@ class ResumeService:
 
     #     return full_text
     
-    def parse_and_chunk_resume(self, file_path: str, filename: str) -> List[Document]:
-        file_extenstion = filename.split(".")[-1].lower()
+    def parse_and_chunk_resume(self, file_path: str, filename: str, original_filename: str) -> List[Document]:
+        file_extenstion = original_filename.split(".")[-1].lower()
         
         # 텍스트 분할기 설정
         text_splitter = RecursiveCharacterTextSplitter(

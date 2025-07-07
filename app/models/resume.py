@@ -13,7 +13,9 @@ class Resume(SQLModel, table=True):
   id: int = Field(default=None, primary_key=True, index=True)
   user_id: int = Field(foreign_key="users.id", index=True)
   version: str
-  file_path: str
+  file_url: str
+  upload_filename: str
+  original_filename: str
   analysis_result: str
   created_at: datetime = Field(
       default_factory=func.now,

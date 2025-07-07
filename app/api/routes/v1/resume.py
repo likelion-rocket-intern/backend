@@ -22,6 +22,8 @@ async def upload_resume(
 )-> AnalysisResponse:
     try:
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        original_filename = file.filename
+        upload_filename = str(uuid.uuid4())
         filename = f"{current_user.id}_{timestamp}_{file.filename}"
         
         # Generate a unique task ID
@@ -33,7 +35,7 @@ async def upload_resume(
         # Upload directly to NCP Object Storage
         from io import BytesIO
         file_obj = BytesIO(content)
-        file_url = storage.upload_resume(file_obj, filename)
+        file_url = storage.upload_resume(file_obj, upload_filename)
         if not file_url:
             raise HTTPException(
                 status_code=500,
@@ -42,8 +44,9 @@ async def upload_resume(
         
         # Send for analysis
         send_resume_analysis.send(
-            file_path=file_url,  # Now using the complete URL
-            filename=filename,
+            file_url=file_url, 
+            original_filename=original_filename,
+            upload_filename=upload_filename,
             user_id=current_user.id,
             task_id=task_id,
         )
@@ -96,7 +99,9 @@ async def get_resume(
             id=resume.id,
             user_id=resume.user_id,
             version=resume.version,
-            file_path=resume.file_path,
+            original_filename=resume.original_filename,
+            upload_filename=resume.upload_filename,
+            file_url=resume.file_url,
             analysis_result=resume.analysis_result,
             created_at=resume.created_at
         )
