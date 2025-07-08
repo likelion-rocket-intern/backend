@@ -1,9 +1,9 @@
+from pickletools import read_uint1
 from sqlmodel import Session, select
 from sqlalchemy import Column, JSON
 from app.models.jinro import Jinro
 from typing import Optional, List, Dict, Any
 
-#obj_in는 
 class CRUDJinro:
     def create(
         # self는 객체 자기자신, db: Session는 인스터
@@ -37,6 +37,11 @@ class CRUDJinro:
             query = query.where(Jinro.user_id == user_id)
         return list(db.exec(query).all())
 
+    # 한 유저 id에서 모든 목록을 조회
+    def get_by_userid(self, db: Session, user_id: int) -> List[Jinro]:
+        query = select(Jinro)
+        query = query.where(Jinro.user_id == user_id)
+        return list(db.exec(query).all())
     # 삭제
     def remove(self, db: Session, id: int) -> Optional[Jinro]:
         obj = db.get(Jinro, id)

@@ -1,24 +1,60 @@
 #이쪽은 repository
 
 
-from sqlmodel import Session
+from sqlmodel import Session, null
 from app.crud.jinro import crud_jinro
 from app.models.jinro import Jinro
+import json
+from app.core.redis import get_redis_client
 
 
 class JinroService:
     #db: Session 이놈은 인스턴스 메서드라서 지 자신인 self를 정의해야 한다
 
-    # 시험 문제를 저장
-
-    # 시험 문제를 불러오기
+    # 시험 문제를 저장, redis에 임시로 저장한다
+    def save_test_redis(self, user_id: int, test: dict):
+        # 임시로 저장할 dict 생성
+        temp_data = {
+            "user_id": user_id,
+            "test": test
+        }
+        
+        # Redis 클라이언트 가져오기
+        redis_client = get_redis_client()
+        
+        # 키 이름 생성 (user_id를 포함하여 고유하게)
+        redis_key = f"jinro_test_{user_id}"
+        
+        # dict를 JSON 문자열로 변환하여 Redis에 저장
+        # 만료 시간을 1시간(3600초)으로 설정
+        redis_client.setex(
+            redis_key, 
+            3600,  # 1시간 후 만료
+            json.dumps(temp_data, ensure_ascii=False)
+        )
+        
+        return redis_key
 
     # 시험 문제를 삭제
 
     # 시험 결과와 시험 문제를 전체 저장
-    def add_test_result(self, db: Session, current_user_id: int, test_result: dict, test: dict):
+    def add_test_result(self, db: Session, current_user_id: int, test_result: dict):
         
-        jinro_count = len(crud_jinro.get_multi(db, current_user_id))
+        # Redis에서 저장된 데이터 가져오기
+        redis_client = get_redis_client()
+        redis_key = f"jinro_test_{current_user_id}"
+        redis_data = redis_client.get(redis_key)
+        
+        # Redis에서 데이터를 가져온 경우, 저장된 test 데이터 사용
+        if redis_data:
+            # bytes를 문자열로 디코딩
+            redis_data_str = redis_data.decode('utf-8') if isinstance(redis_data, bytes) else str(redis_data)
+            temp_data = json.loads(redis_data_str)
+            stored_test = temp_data.get("test")  # Redis에 저장된 test가 있으면 사용, 없으면 매개변수 test 사용
+        else:
+            stored_test = null  # Redis에 데이터가 없으면 매개변수 test 사용
+        
+        jinro_count = len(crud_jinro.get_by_userid(db, current_user_id))
         version = f"v_{jinro_count + 1}.0"
 
         new_jinro = Jinro(
@@ -39,6 +75,10 @@ class JinroService:
             #       대충 파일명을 "userId_테스트"
             #    근데 생각해보면 유저가 여려명인 경우 로컬에 저장하면 우수수수 쏟아질텐데?
             #    그럼 redis에 저장하자
-            test= test,
+            test= stored_test,
         )
         new_jinro = crud_jinro.create(db, jinro=new_jinro)
+        
+        # Redis에서 임시 데이터 삭제 (테스트 완료 후 정리)
+        if redis_data:
+            redis_client.delete(redis_key)

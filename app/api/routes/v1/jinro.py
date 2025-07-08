@@ -4,6 +4,7 @@ from fastapi import status
 from pydantic import BaseModel, Field
 
 from app.api.deps import SessionDep, CurrentUser
+from app.service.jinro_service import JinroService
 
 router = APIRouter(tags=["jinro"])
 
@@ -27,6 +28,8 @@ async def get_test_questions_v1(current_user:CurrentUser):
     if response.status_code == 200:
         # 여기서 유저의 정보를 받자
         current_user_id = current_user.id
+        # JinroService의 save_test_redis 호출
+        JinroService().save_test_redis(current_user_id, response.json())
         # 그리고 유저의 정보와 함께 
         return response.json()
     else:
