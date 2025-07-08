@@ -13,6 +13,9 @@ from docx import Document as DocxDocument
 from langchain_community.document_loaders import PyMuPDFLoader, Docx2txtLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from app.utils.storage import delete_resume
+from app.repository.sql_embedding_repository import SqlEmbeddingRepository
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
 
 
 class ResumeService:
@@ -192,5 +195,77 @@ class ResumeService:
     #         "chunks_count": len(chunks),
     #         "embeddings_saved": len(embedding_records)
     #     }
+
+    def _get_itemwise_scores(self, resume_vectors: list, dataset_embeddings: list) -> list:
+        """
+        이력서 벡터와 데이터셋을 비교하여, 각 항목별 점수를 계산하고 정렬합니다.
+        
+        1. 이력서의 각 청크와 데이터셋의 각 항목 간의 코사인 유사도 매트릭스를 생성합니다.
+        2. 각 데이터셋 항목(예: 소프트웨어 엔지니어)에 대해, 이력서 청크 중 가장 높은 유사도 점수를 찾습니다.
+        3. 이 점수들의 총합이 100이 되도록 백분위로 변환합니다.
+        4. (항목 이름, 점수) 형태의 리스트로 만들어 점수가 높은 순으로 정렬하여 반환합니다.
+        """
+        if not dataset_embeddings:
+            return []
+
+        # 1. 데이터셋에서 벡터와 이름(또는 속성)을 분리합니다.
+        target_vectors = np.array([e.embedding for e in dataset_embeddings])
+        # 'job' 타입일 경우 name, 'resume' 타입일 경우 attribute를 사용합니다.
+        target_names = [e.name if hasattr(e, 'name') and e.name else e.attribute for e in dataset_embeddings]
+        
+        resume_vectors_np = np.array(resume_vectors)
+
+        # 2. 코사인 유사도 계산
+        similarity_matrix = cosine_similarity(resume_vectors_np, target_vectors)
+
+        # 3. 각 데이터셋 항목별 '최대' 유사도 점수를 추출합니다.
+        # axis=0은 각 열(항목)에서 최대값을 찾는다는 의미입니다.
+        max_similarities = np.max(similarity_matrix, axis=0)
+        
+        # 4. 점수들을 백분위로 정규화합니다 (총합이 100이 되도록).
+        total_similarity = np.sum(max_similarities)
+        if total_similarity == 0:
+            # 모든 유사도가 0일 경우, 균등하게 점수를 분배하거나 0으로 처리합니다.
+            scores = [0] * len(target_names)
+        else:
+            scores = (max_similarities / total_similarity) * 100
+        
+        # 5. (이름, 점수) 튜플 리스트를 만들고 점수 순으로 정렬합니다.
+        results = sorted(
+            zip(target_names, scores),
+            key=lambda item: item[1],
+            reverse=True
+        )
+        
+        return results
+
+    def analyze_resume_fitness(self, db: Session, resume_vectors: list) -> dict:
+        """
+        이력서 벡터를 '직무' 및 '이력서 평가' 데이터셋과 비교하여 종합 분석 결과를 반환합니다.
+
+        상위 몇개만 할꺼면 top_n: int = 5 를 추가해서
+        job_fitness_scores[:top_n], resume_evaluation_scores[:top_n] 슬라이싱하면 됨
+        """
+        embedding_repo = SqlEmbeddingRepository(db)
+
+        # 1. 직무 적합성 분석 (job 타입 데이터셋과 비교)
+        job_embeddings = embedding_repo.get_all_by_type("job")
+        job_fitness_scores = self._get_itemwise_scores(resume_vectors, job_embeddings)
+
+        # 2. 이력서 강점/보완점 분석 (resume 타입 데이터셋과 비교)
+        resume_eval_embeddings = embedding_repo.get_all_by_type("resume")
+        resume_evaluation_scores = self._get_itemwise_scores(resume_vectors, resume_eval_embeddings)
+        
+        # 3. 최종 결과를 구조화하여 반환합니다.
+        return {
+            "job_fitness": [
+                {"job_name": name, "score": round(score, 2)}
+                for name, score in job_fitness_scores
+            ],
+            "resume_evaluation": [
+                {"attribute": attr, "score": round(score, 2)}
+                for attr, score in resume_evaluation_scores
+            ]
+        }
     
 resume_service = ResumeService()

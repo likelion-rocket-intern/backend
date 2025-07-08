@@ -18,6 +18,11 @@ class CRUDEmbedding:
             Embedding.object_type == object_type
         )
         return list(db.exec(statement))
+    
+    def get_all_by_type(self, db: Session, *, object_type: str) -> List[Embedding]:
+        """특정 타입의 모든 임베딩 객체를 조회"""
+        statement = select(Embedding).where(Embedding.object_type == object_type)
+        return list(db.exec(statement).all())
 
     def update(self, db: Session, *, embedding_obj: Embedding, **kwargs) -> Embedding:
         for key, value in kwargs.items():
