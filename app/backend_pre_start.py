@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.core.db import engine
 
 from app.service.embedding_service import DataEmbedder
+from app.models.embedding import Embedding
 from app.repository.sql_embedding_repository import SqlEmbeddingRepository
 
 logging.basicConfig(level=logging.INFO)
@@ -57,6 +58,8 @@ def init_redis() -> None:
         redis_client.close()
 
 def init_embedding(db_engine):
+    Embedding.metadata.create_all(db_engine)
+    logger.info("`embeddings` 테이블 생성 또는 확인 완료.")
     # DB 세션 생성
     with Session(db_engine) as session:
         # Repository 인스턴스 생성 (의존성 주입)
@@ -81,6 +84,7 @@ def main() -> None:
     logger.info("Initializing service")
     init_db(engine)
     init_redis()
+    init_embedding(engine)
     logger.info("Service finished initializing")
 
 
