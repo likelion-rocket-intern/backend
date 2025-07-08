@@ -60,3 +60,18 @@ user = db.query(User).options(selectinload(User.resumes)).first() -->
 <!-- 실행중인 ubicorn 확인 -->
 <!-- ps aux | grep "uvicorn\|python" | grep -v grep -->
 <!-- pkill -f "uvicorn app.main:app" -->
+
+
+<!-- # 필요한 빌드 도구 설치
+apt-get update
+apt-get install -y build-essential postgresql-server-dev-17 git
+
+# pgvector 소스 다운로드 및 컴파일
+cd /tmp
+git clone --branch v0.6.0 https://github.com/pgvector/pgvector.git
+cd pgvector
+make
+make install
+
+# PostgreSQL에 접속해서 확장 활성화
+psql -U myuser -d ll_rocket -c "CREATE EXTENSION vector;" -->
