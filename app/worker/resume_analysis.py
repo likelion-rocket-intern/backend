@@ -6,9 +6,10 @@ from app.schemas.status import TaskResumeStatus
 from app.core.db import engine
 from sqlmodel import Session
 from app.models.resume import Resume
+from app.models.resume_embedding import ResumeEmbedding
 from app.service.resume_service import resume_service
 from app.crud import resume_crud
-from app.utils.storage import download_resume
+from app.utils.storage import download_resume, delete_resume
 import os
 
 logger = logging.getLogger(__name__)
@@ -43,46 +44,61 @@ def send_resume_analysis(
 ) -> None:
     temp_file_path = None
     try:
-        # user_id를 정수형으로 명시적 변환
         user_id = int(user_id)
-        
         update_task_status(task_id, TaskResumeStatus.PROCESSING)
         logger.info(f"Starting resume analysis for user: {user_id}, file: {original_filename}")
         
-        # Worker 내부에서 새로운 DB 세션 생성
         with Session(engine) as session:
+            with session.begin():  # 트랜잭션 시작
+                # 1. 새로운 이력서 생성
+                resume_count = len(resume_crud.get_by_user_id(session, user_id))
+                version = f"v_{resume_count + 1}.0"
 
-            # 1. 새로운 이력서 생성
-            resume_count = len(resume_crud.get_by_user_id(session, user_id))
-            version = f"v_{resume_count + 1}.0"
+                new_resume = Resume(
+                    user_id=user_id,
+                    file_url=file_url,
+                    original_filename=original_filename,
+                    upload_filename=upload_filename,
+                    version=version,
+                    analysis_result="Processing"
+                )
 
-            new_resume = Resume(
-                user_id=user_id,
-                file_url=file_url,
-                original_filename=original_filename,
-                upload_filename=upload_filename,
-                version=version,
-                analysis_result="Sample analysis result"
-            )
+                # 1.5. 파일 다운로드
+                temp_file_path = download_resume(upload_filename)
+                if not temp_file_path:
+                    raise Exception("Failed to download file from storage")
 
-            resume = resume_crud.create(session, resume=new_resume)
+                # 2. 파일 파싱 & 청킹
+                chunks = resume_service.parse_and_chunk_resume(temp_file_path, upload_filename, original_filename)
+                update_task_status(task_id, TaskResumeStatus.PARSING, {"message": "파일 파싱 중입니다."})
+                
+                # 3. 청크 임베딩
+                vectors = resume_service.create_embeddings(chunks)
+                update_task_status(task_id, TaskResumeStatus.EMBEDDING, {"message": "임베딩 중 입니다."})
+                
+                # 4. Resume와 Embeddings 한번에 저장
+                new_resume.resume_embeddings = [
+                    ResumeEmbedding(
+                        chunk_index=idx,
+                        content=chunk,
+                        embedding=vector
+                    )
+                    for idx, (chunk, vector) in enumerate(zip(chunks, vectors))
+                ]
+                
+                # 5. 한 트랜잭션으로 저장
+                session.add(new_resume)
+                
+                # 분석 결과 업데이트
+                new_resume.analysis_result = "Analysis completed"
+                
+                # 트랜잭션 자동 commit
 
-            # 1.5. 파일 다운로드
-            temp_file_path = download_resume(upload_filename)
-            if not temp_file_path:
-                raise Exception("Failed to download file from storage")
+            # --- 5. (확장) 이력서 종합 적합도 분석 ---
+            update_task_status(task_id, TaskResumeStatus.SCORING, {"message": "종합 적합도를 분석 중입니다."})
+            # 새로 생성된 이력서의 벡터를 사용하여 종합 분석 서비스 호출
+            analysis_result = resume_service.analyze_resume_fitness(session, resume_vectors=vectors)
 
-            # 2. 파일 파싱 & 청킹
-            chunks = resume_service.parse_and_chunk_resume(temp_file_path, upload_filename, original_filename)
-            update_task_status(task_id, TaskResumeStatus.PARSING, {"message": "파일 파싱 중입니다."})
-            
-            # 3. 청크 임베딩
-            vectors = resume_service.create_embeddings(chunks)
-            update_task_status(task_id, TaskResumeStatus.EMBEDDING, {"message": "임베딩 중 입니다."})
-            
-            # 4. 청크 저장
-            resume_service.save_embeddings_to_db(session, resume.id, chunks, vectors)
-            update_task_status(task_id, TaskResumeStatus.SAVING, {"message": "결과를 저장 중입니다."})
 
             # --- 5. (확장) 이력서 종합 적합도 분석 ---
             update_task_status(task_id, TaskResumeStatus.SCORING, {"message": "종합 적합도를 분석 중입니다."})
@@ -101,6 +117,7 @@ def send_resume_analysis(
         logger.info(f"Resume analysis completed for user: {user_id}, file: {original_filename}")
     except Exception as e:
         logger.error(f"Resume analysis failed for user: {user_id}, file: {original_filename}: {str(e)}")
+        delete_resume(upload_filename)
         update_task_status(task_id, TaskResumeStatus.FAILED, {"error": str(e)})
         raise 
     finally:
