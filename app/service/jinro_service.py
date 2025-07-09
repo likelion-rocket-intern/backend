@@ -6,6 +6,7 @@ from app.crud.jinro import crud_jinro
 from app.models.jinro import Jinro
 import json
 from app.core.redis import get_redis_client
+from typing import Optional
 
 
 class JinroService:
@@ -55,7 +56,7 @@ class JinroService:
             #       대충 파일명을 "userId_테스트"
             #    근데 생각해보면 유저가 여려명인 경우 로컬에 저장하면 우수수수 쏟아질텐데?
             #    그럼 redis에 저장하자
-    def add_test_result(self, db: Session, current_user_id: int, test_result: dict):
+    def add_test_result(self, db: Session, current_user_id: int, test_result: dict) -> int:
         # Redis에서 저장된 데이터 가져오기
         redis_client = get_redis_client()
         redis_key = f"jinro_test_{current_user_id}"
@@ -86,3 +87,8 @@ class JinroService:
         if redis_data:
             redis_client.delete(redis_key)
         
+        return new_jinro.id
+    
+    # id 가지고 조회
+    def find_by_id(self, db: Session, id: int) -> Optional[Jinro]:
+        return crud_jinro.get_by_id(db, id)
