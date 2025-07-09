@@ -16,7 +16,7 @@ class ResumeEmbedding(SQLModel, table=True):
   resume_id: int = Field(foreign_key="resumes.id", index=True)
   chunk_index: int
   content: str
-  embedding: Optional[list[float]] = Field(sa_column=Column(Vector(1536)))
+  embedding: Optional[list[float]] = Field(sa_column=Column(Vector(1024)))
   created_at: datetime = Field(
       default_factory=func.now,
       sa_column_kwargs={"server_default": func.now()}
