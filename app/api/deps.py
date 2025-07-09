@@ -12,7 +12,7 @@ from app.core import security
 from app.core.config import settings
 from app.core.db import engine
 from app.models import User
-from app.schemas.auth import UserInfo
+from app.schemas.auth import UserInfo, TokenPayload
 
 def get_db() -> Generator[Session, None, None]:
     with Session(engine) as session:
