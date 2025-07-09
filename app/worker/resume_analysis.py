@@ -89,7 +89,11 @@ def send_resume_analysis(
             # 새로 생성된 이력서의 벡터를 사용하여 종합 분석 서비스 호출
             analysis_result = resume_service.analyze_resume_fitness(session, resume_vectors=vectors)
 
-
+            resume.analysis_result = analysis_result
+            session.add(resume) # 변경된 객체 세션에 추가
+            session.commit() # DB에 변경사항 반영
+            session.refresh(resume) # DB에서 최신 상태로 새로고침
+            
             # 분석 완료 후 상태 업데이트
             result = {
                 "filename": original_filename,
