@@ -233,21 +233,28 @@ class ResumeService:
         # 3. 각 데이터셋 항목별 '최대' 유사도 점수를 추출합니다.
         # axis=0은 각 열(항목)에서 최대값을 찾는다는 의미입니다.
         max_similarities = np.max(similarity_matrix, axis=0)
-        
+        max_similarities_positive = np.maximum(0, max_similarities)
+
+        # 결과를 pandas DataFrame으로 변환해서 계산된 모든 결과를 (이름, 점수) 형태로 DF에 담습니다.
+        df = pd.DataFrame({
+            'name': target_names,
+            'score': max_similarities_positive
+        })
+
+        # 동일한 이름으로 그룹화하여 평균 점수를 계산합니다.
+        #  'name' 기준으로 그룹 묶고, score의 평균을 계산합니다.
+        grouped_scores = df.groupby('name')['score'].mean().reset_index()
+
         # 4. 점수들을 백분위로 정규화합니다 (총합이 100이 되도록).
-        total_similarity = np.sum(max_similarities)
-        if total_similarity == 0:
-            # 모든 유사도가 0일 경우, 균등하게 점수를 분배하거나 0으로 처리합니다.
-            scores = [0] * len(target_names)
+        total_similarity = grouped_scores['score'].sum()
+        if total_similarity > 0:
+            grouped_scores['score'] = (grouped_scores['score'] / total_similarity) * 100
         else:
-            scores = (max_similarities / total_similarity) * 100
+            grouped_scores['score'] = 0
         
-        # 5. (이름, 점수) 튜플 리스트를 만들고 점수 순으로 정렬합니다.
-        results = sorted(
-            zip(target_names, scores),
-            key=lambda item: item[1],
-            reverse=True
-        )
+        # 5. 점수 순으로 정렬하고 결과를 반환합니다.
+        sorted_results = grouped_scores.sort_values(by='score', ascending=False)
+        results = list(zip(sorted_results['name'], sorted_results['score']))
         
         return results
 
