@@ -1,8 +1,23 @@
 import os
+import sys
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+from pathlib import Path
+
+
+# env.py 파일이 있는 디렉토리 (app/alembic/)
+# current_dir = Path(__file__).parent
+
+# # app/ 디렉토리
+# app_dir = current_dir.parent
+
+# # backend/ 프로젝트 루트 디렉토리
+# project_root = app_dir.parent
+
+# # 프로젝트 루트를 Python 경로에 추가
+# sys.path.insert(0, str(project_root))
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -17,7 +32,6 @@ fileConfig(config.config_file_name)
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 # target_metadata = None
-
 from app.models import SQLModel  # noqa
 from app.core.config import settings # noqa
 

@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field
 
 from app.api.deps import SessionDep, CurrentUser
 from app.service.jinro_service import JinroService
+from app.core.config import settings
+from app.schemas.jinro import JinroTestReportRequest
 
 router = APIRouter(tags=["jinro"])
 
@@ -20,7 +22,7 @@ async def get_test_questions_v1(current_user:CurrentUser):
 
     url = "https://www.career.go.kr/inspct/openapi/test/questions"
     params = {
-        "apikey": "878211ba94ee6b8314869638fe245b6a",
+        "apikey": settings.JINRO_API_KEY,
         "q": "6"
     }
     async with httpx.AsyncClient() as client:
@@ -39,21 +41,17 @@ async def get_test_questions_v1(current_user:CurrentUser):
             "detail": response.text
         }
 
-class JinroTestReportRequest(BaseModel):
-    apikey: str = Field(..., example="878211ba94ee6b8314869638fe245b6a")
-    qestrnSeq: str = Field(..., example="6")
-    trgetSe: str = Field(..., example="100208")
-    gender: str = Field(..., example="100323")
-    startDtm: int = Field(..., example=1550466291034)
-    answers: str = Field(..., example="1=2 2=3 3=6 4=7 5=10 6=12 7=13 8=15 9=17 10=20 11=21 12=24 13=25 14=28 15=29 16=31 17=33 18=35 19=38 20=40 21=41 22=44 23=45 24=48 25=50 26=52 27=53 28=56")
-
 # 검사 결과 요청 (비동기)
 @router.post("/test-report-v1")
 async def post_test_report_v1(body: JinroTestReportRequest):
-    url = "httpsq://www.career.go.kr/inspct/openapi/test/report"
+    url = "https://www.career.go.kr/inspct/openapi/test/report"
     headers = {"Content-Type": "application/json"}
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json=body.dict(), headers=headers)
+    url2 = "https://www.career.go.kr/cloud/api/inspect/report?seq=Nzc3NzQzMDU"
+    async with httpx.AsyncClient() as client;
+        
+
     if response.status_code == 200:
         # TODO 여기서 json에 있는 url를 긁어 와서 원하는 정보를 넣어둔다
            # 일단 여기서 처리하고 추후 Service에 넣을지 지켜봅시다
