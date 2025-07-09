@@ -56,7 +56,6 @@ class JinroService:
             #    근데 생각해보면 유저가 여려명인 경우 로컬에 저장하면 우수수수 쏟아질텐데?
             #    그럼 redis에 저장하자
     def add_test_result(self, db: Session, current_user_id: int, test_result: dict):
-        
         # Redis에서 저장된 데이터 가져오기
         redis_client = get_redis_client()
         redis_key = f"jinro_test_{current_user_id}"
@@ -86,3 +85,4 @@ class JinroService:
         # Redis에서 임시 데이터 삭제 (테스트 완료 후 정리)
         if redis_data:
             redis_client.delete(redis_key)
+        
