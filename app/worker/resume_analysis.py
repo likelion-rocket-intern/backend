@@ -84,11 +84,17 @@ def send_resume_analysis(
             resume_service.save_embeddings_to_db(session, resume.id, chunks, vectors)
             update_task_status(task_id, TaskResumeStatus.SAVING, {"message": "결과를 저장 중입니다."})
 
+            # --- 5. (확장) 이력서 종합 적합도 분석 ---
+            update_task_status(task_id, TaskResumeStatus.SCORING, {"message": "종합 적합도를 분석 중입니다."})
+            # 새로 생성된 이력서의 벡터를 사용하여 종합 분석 서비스 호출
+            analysis_result = resume_service.analyze_resume_fitness(session, resume_vectors=vectors)
+
+
             # 분석 완료 후 상태 업데이트
             result = {
                 "filename": original_filename,
                 "user_id": user_id,
-                "analysis_result": "Sample analysis result"  # TODO: 실제 분석 결과로 대체
+                "analysis_result": analysis_result  # 로 변환 완료
             }
             update_task_status(task_id, TaskResumeStatus.COMPLETED, result)
         
