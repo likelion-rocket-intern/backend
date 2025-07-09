@@ -8,6 +8,10 @@ from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixe
 from app.core.config import settings
 from app.core.db import engine
 
+from app.service.embedding_service import DataEmbedder
+from app.models.embedding import Embedding
+from app.repository.sql_embedding_repository import SqlEmbeddingRepository
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -53,11 +57,34 @@ def init_redis() -> None:
     finally:
         redis_client.close()
 
+def init_embedding(db_engine):
+    Embedding.metadata.create_all(db_engine)
+    logger.info("`embeddings` 테이블 생성 또는 확인 완료.")
+    # DB 세션 생성
+    with Session(db_engine) as session:
+        # Repository 인스턴스 생성 (의존성 주입)
+        embedding_repository = SqlEmbeddingRepository(session)
+
+        # 임베딩 서비스 인스턴스에 repository 주입
+        resume_embedder = DataEmbedder(
+            "datas/resume_data.csv",
+            column="attribute",
+            repository=embedding_repository
+        )
+        resume_embedder.run()
+
+        job_embedder = DataEmbedder(
+            "datas/job_data.csv",
+            column="name",
+            repository=embedding_repository
+        )
+        job_embedder.run()
 
 def main() -> None:
     logger.info("Initializing service")
     init_db(engine)
     init_redis()
+    init_embedding(engine)
     logger.info("Service finished initializing")
 
 
