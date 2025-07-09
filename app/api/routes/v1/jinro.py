@@ -43,21 +43,52 @@ async def get_test_questions_v1(current_user:CurrentUser):
 
 # 검사 결과 요청 (비동기)
 @router.post("/test-report-v1")
-async def post_test_report_v1(body: JinroTestReportRequest):
+async def post_test_report_v1(body: JinroTestReportRequest, current_user:CurrentUser, db: SessionDep):
     url = "https://www.career.go.kr/inspct/openapi/test/report"
     headers = {"Content-Type": "application/json"}
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json=body.dict(), headers=headers)
-    #url2 = "https://www.career.go.kr/cloud/api/inspect/report?seq=Nzc3NzQzMDU"
-    #async with httpx.AsyncClient() as client:
-
-
 
     if response.status_code == 200:
-        # TODO 여기서 json에 있는 url를 긁어 와서 원하는 정보를 넣어둔다
-           # 일단 여기서 처리하고 추후 Service에 넣을지 지켜봅시다
-        # TODO 그리고 그 정보를 serviec에 저장시킨다
-        return response.json()
+        response_data = response.json()
+        # url에서 seq 파라미터 값 추출
+        seq_value = None
+        if response_data.get("SUCC_YN") == "Y" and response_data.get("RESULT", {}).get("url"):
+            url = response_data["RESULT"]["url"]
+            if "seq=" in url:
+                seq_value = url.split("seq=")[1]
+                if "&" in seq_value:
+                    seq_value = seq_value.split("&")[0]
+        # seq 값이 있으면 새로운 API에 요청
+        if seq_value:
+            url2 = f"https://www.career.go.kr/cloud/api/inspect/report?seq={seq_value}"
+            async with httpx.AsyncClient() as client:
+                response2 = await client.get(url2)
+            if response2.status_code == 200:
+                # report6.json API도 함께 요청
+                url3 = "https://www.career.go.kr/cloud/data/report6.json"
+                async with httpx.AsyncClient() as client:
+                    response3 = await client.get(url3)
+                
+                result_data = response2.json()
+                if response3.status_code == 200:
+                    result_data["report6_data"] = response3.json()
+                else:
+                    result_data["report6_error"] = {
+                        "status_code": response3.status_code,
+                        "detail": response3.text
+                    }
+                    JinroService().add_test_result(db, current_user.id, result_data) 
+                
+                return result_data
+            else:
+                return {
+                    "error": "2차 API 요청 실패",
+                    "status_code": response2.status_code,
+                    "detail": response2.text
+                }
+        # seq 값이 없으면 기존 데이터 리턴
+        return response_data
     else:
         return {
             "error": "API 요청 실패",

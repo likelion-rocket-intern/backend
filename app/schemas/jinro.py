@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 
 class JinroTestReportRequest(BaseModel):
+    #TODO 여기 환경변수로 넣으셈
     apikey: str = Field(..., examples=["878211ba94ee6b8314869638fe245b6a"])
     qestrnSeq: str = Field(..., examples=["6"])
     trgetSe: str = Field(..., examples=["100208"])
