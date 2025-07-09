@@ -100,6 +100,12 @@ def send_resume_analysis(
             analysis_result = resume_service.analyze_resume_fitness(session, resume_vectors=vectors)
 
 
+            # --- 5. (확장) 이력서 종합 적합도 분석 ---
+            update_task_status(task_id, TaskResumeStatus.SCORING, {"message": "종합 적합도를 분석 중입니다."})
+            # 새로 생성된 이력서의 벡터를 사용하여 종합 분석 서비스 호출
+            analysis_result = resume_service.analyze_resume_fitness(session, resume_vectors=vectors)
+
+
             # 분석 완료 후 상태 업데이트
             result = {
                 "filename": original_filename,
