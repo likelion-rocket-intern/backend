@@ -16,13 +16,25 @@ from app.utils.storage import delete_resume
 from app.repository.sql_embedding_repository import SqlEmbeddingRepository
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+import pandas as pd
 
 
 class ResumeService:
     def __init__(self):
+        # HuggingFace Embedding 모델 벡터 차원수가 1024 이므로 맞춰주어야합니다.
+        # 만약 HuggingFace 모델을 사용하신다면 변경하시면 됩니다.
+        """
+        from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+
+        self.embeddings = HuggingFaceEmbeddings(
+                model_name = settings.EMBBEDING_MODEL,
+            )
+        """
+        
         self.embeddings = OpenAIEmbeddings(
             model=settings.OPENAI_EMBEDDING_MODEL,
-            api_key=settings.OPENAI_API_KEY
+            api_key=settings.OPENAI_API_KEY,
+            dimensions=1024
         )
 
     def create(
