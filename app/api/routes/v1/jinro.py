@@ -48,9 +48,10 @@ async def post_test_report_v1(body: JinroTestReportRequest):
     headers = {"Content-Type": "application/json"}
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json=body.dict(), headers=headers)
-    url2 = "https://www.career.go.kr/cloud/api/inspect/report?seq=Nzc3NzQzMDU"
-    async with httpx.AsyncClient() as client;
-        
+    #url2 = "https://www.career.go.kr/cloud/api/inspect/report?seq=Nzc3NzQzMDU"
+    #async with httpx.AsyncClient() as client:
+
+
 
     if response.status_code == 200:
         # TODO 여기서 json에 있는 url를 긁어 와서 원하는 정보를 넣어둔다
