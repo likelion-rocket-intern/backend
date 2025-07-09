@@ -46,6 +46,8 @@ async def get_test_questions_v1(current_user:CurrentUser):
 async def post_test_report_v1(body: JinroTestReportRequest):
     url = "https://www.career.go.kr/inspct/openapi/test/report"
     headers = {"Content-Type": "application/json"}
+    body.apikey = settings.JINRO_API_KEY
+    
     async with httpx.AsyncClient() as client:
         response = await client.post(url, json=body.dict(), headers=headers)
     #url2 = "https://www.career.go.kr/cloud/api/inspect/report?seq=Nzc3NzQzMDU"
