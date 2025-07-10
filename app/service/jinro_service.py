@@ -135,8 +135,11 @@ class JinroService:
         return crud_jinro.get_by_id(db, id)
     
     # 유저 아이디 가지고  결과 조회
-    def find_by_user_id(self, db: Session, id: int)-> List[JinroResult]:
-        return crud_jinro_result.get_by_jinro_id(db, id)
+    def find_by_user_id(self, db: Session, user_id: int)-> List[JinroResult]:
+        jinro = crud_jinro.get_latest_by_user_id(db, user_id)
+        if jinro is None:
+            return [] 
+        return crud_jinro_result.get_by_jinro_id(db, jinro.id)
         # 여기서 스키마로 딱 바꾸면 좋은데
     
 
