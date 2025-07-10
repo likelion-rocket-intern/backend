@@ -3,11 +3,14 @@
 set -e
 set -x
 
-# Let the DB start
+# First check if DB and Redis are ready
 python app/backend_pre_start.py
 
-# Run migrations
+# Then run migrations
 alembic upgrade head
+
+# Finally initialize embeddings
+python app/backend_pre_embed.py
 
 # Create initial data in DB
 # python app/initial_data.py

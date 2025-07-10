@@ -214,11 +214,6 @@ class ResumeService:
     ) -> list[dict]:
         """
         이력서 벡터와 데이터셋을 비교하여, 각 항목별 점수를 계산하고 정렬합니다.
-        
-        1. 이력서의 각 청크와 데이터셋의 각 항목 간의 코사인 유사도 매트릭스를 생성합니다.
-        2. 각 데이터셋 항목(예: 소프트웨어 엔지니어)에 대해, 이력서 청크 중 가장 높은 유사도 점수를 찾습니다.
-        3. 이 점수들의 총합이 100이 되도록 백분위로 변환합니다.
-        4. (항목 이름, 점수) 형태의 리스트로 만들어 점수가 높은 순으로 정렬하여 반환합니다.
         """
         if not dataset_embeddings or not resume_vectors:
             return []
@@ -244,10 +239,20 @@ class ResumeService:
             'data': target_data_list
         })
 
-        # 동일한 이름으로 그룹화하여 평균 점수를 계산합니다.
-        #  'name' 기준으로 그룹 묶고, score의 평균을 계산합니다.
-        grouped_scores = df.groupby('identifier').agg(
-            score=('score', 'mean'),
+        # 정규분포 임계치 설정 (qualified_df)
+        mean_score = df['score'].mean()
+        std_score = df['score'].std()
+        std_multiplier = 0.8
+        threshold = mean_score + std_multiplier * std_score
+
+        qualified_df = df[df['score'] >= threshold]
+
+        if qualified_df.empty:
+            return []
+
+        # 동일한 이름으로 그룹화하여 최고점수를 추출합니다. (가장 높게 나온 유사도 점수를 가져와서 전문성 파악할 시 유리.. 다른 방식도 고려 필요 )
+        grouped_scores = qualified_df.groupby('identifier').agg(
+            score=('score', 'max'),
             data=('data', 'first')
         ).reset_index()
 
@@ -271,9 +276,6 @@ class ResumeService:
     def analyze_resume_fitness(self, db: Session, resume_vectors: list) -> dict:
         """
         이력서 벡터를 '직무' 및 '이력서 평가' 데이터셋과 비교하여 종합 분석 결과를 반환합니다.
-
-        상위 몇개만 할꺼면 top_n: int = 5 를 추가해서
-        job_fitness_scores[:top_n], resume_evaluation_scores[:top_n] 슬라이싱하면 됨
         """
         embedding_repo = SqlEmbeddingRepository(db)
 
