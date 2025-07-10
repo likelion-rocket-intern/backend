@@ -15,5 +15,6 @@ class TaskResumeStatus(str, Enum):
     CHUNKING = "chunking"
     EMBEDDING = "embedding"
     SAVING = "saving"
+    SCORING = "scoring"
     COMPLETED = "completed"
     FAILED = "failed"

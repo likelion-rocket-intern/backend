@@ -20,9 +20,13 @@ def extract_object_type(file_path: str) -> str:
     return object_type
 
 class DataEmbedder:
-    def __init__(self, file_path: str, column: str, repository: EmbeddingRepository):
+    def __init__(self, 
+                file_path: str,
+                repository: EmbeddingRepository, 
+                columns: list[str] | None = None
+                ):
         self.file_path = file_path
-        self.column = column
+        self.columns = columns
         self.repository = repository
         self.df = None
         self.texts = None
@@ -37,7 +41,14 @@ class DataEmbedder:
             self.df = pd.read_json(self.file_path)
         else:
             raise ValueError("지원하지 않는 파일 형식입니다.")
-        self.texts = self.df[self.column].astype(str).tolist()
+        
+        if self.columns is None:
+            self.columns = self.df.columns.tolist()
+            logger.info(f"컬럼이 지정되지 않아 파일의 모든 컬럼을 사용합니다: {self.columns}")
+
+
+        self.df[self.columns] = self.df[self.columns].fillna('')
+        self.texts = self.df[self.columns].astype(str).agg(' '.join, axis=1).tolist()
         logger.info(f"{len(self.texts)}개의 텍스트를 로드했습니다.")
 
     def embed(self):
@@ -52,16 +63,17 @@ class DataEmbedder:
         for idx, (row, vector) in enumerate(zip(self.df.itertuples(), self.vectors)):
             object_id = getattr(row, "id", idx)
             # --- 중복 체크 ---
-            if self.repository.exists(object_id, self.object_type):
+            if self.repository.exists(str(object_id), self.object_type):
                 continue
+
+            row_dict = row._asdict()
+            row_dict.pop('Index', None)
+
             embedding_obj = Embedding(
-                object_id=object_id,
+                object_id=str(object_id),
                 object_type=self.object_type,
                 embedding=vector,
-                name=getattr(row, "name", None),
-                skill=getattr(row, "skill", None),
-                attribute=getattr(row, "attribute", None),
-                description=getattr(row, "description", None),
+                extra_data=row_dict
             )
             self.repository.save(embedding_obj)
         logger.info("DB 저장 완료")
