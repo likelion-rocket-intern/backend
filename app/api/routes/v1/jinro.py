@@ -19,6 +19,12 @@ router = APIRouter(tags=["jinro"])
 async def get_jinro_by_user(db:SessionDep, current_user:CurrentUser):
     return JinroService().find_by_user_id(db, current_user.id)
 
+# 채신 버전 결과만 조회
+@router.get("/user/latest")
+async def get_jinro_by_user_latest(db:SessionDep, current_user:CurrentUser):
+    return JinroService().find_by_user_id_latest(db, current_user.id)
+
+
 # 커리어넷 v1 심리검사 문항 요청 (비동기)
 @router.get("/test-questions-v1")
 async def get_test_questions_v1(current_user:CurrentUser):
@@ -128,4 +134,4 @@ async def post_test_report_v1(
 #     if result:
 #         return result
 #     else:
-#         return {"error": "해당 id의 결과가 없심더."}
+#         return {"error": "해당 id의 결과가 없심더."}z
