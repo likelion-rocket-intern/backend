@@ -5,6 +5,7 @@ from typing import Optional, List
 from fastapi import HTTPException
 from app.core.config import settings
 from app.models.resume_embedding import ResumeEmbedding
+from app.models.embedding import Embedding
 import json
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
@@ -16,13 +17,25 @@ from app.utils.storage import delete_resume
 from app.repository.sql_embedding_repository import SqlEmbeddingRepository
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+import pandas as pd
 
 
 class ResumeService:
     def __init__(self):
+        # HuggingFace Embedding 모델 벡터 차원수가 1024 이므로 맞춰주어야합니다.
+        # 만약 HuggingFace 모델을 사용하신다면 변경하시면 됩니다.
+        """
+        from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+
+        self.embeddings = HuggingFaceEmbeddings(
+                model_name = settings.EMBBEDING_MODEL,
+            )
+        """
+        
         self.embeddings = OpenAIEmbeddings(
             model=settings.OPENAI_EMBEDDING_MODEL,
-            api_key=settings.OPENAI_API_KEY
+            api_key=settings.OPENAI_API_KEY,
+            dimensions=1024
         )
 
     def create(
@@ -196,7 +209,9 @@ class ResumeService:
     #         "embeddings_saved": len(embedding_records)
     #     }
 
-    def _get_itemwise_scores(self, resume_vectors: list, dataset_embeddings: list) -> list:
+    def _get_itemwise_scores(
+            self, resume_vectors: list, dataset_embeddings: list[Embedding], key_name: str
+    ) -> list[dict]:
         """
         이력서 벡터와 데이터셋을 비교하여, 각 항목별 점수를 계산하고 정렬합니다.
         
@@ -205,39 +220,53 @@ class ResumeService:
         3. 이 점수들의 총합이 100이 되도록 백분위로 변환합니다.
         4. (항목 이름, 점수) 형태의 리스트로 만들어 점수가 높은 순으로 정렬하여 반환합니다.
         """
-        if not dataset_embeddings:
+        if not dataset_embeddings or not resume_vectors:
             return []
 
         # 1. 데이터셋에서 벡터와 이름(또는 속성)을 분리합니다.
         target_vectors = np.array([e.embedding for e in dataset_embeddings])
-        # 'job' 타입일 경우 name, 'resume' 타입일 경우 attribute를 사용합니다.
-        target_names = [e.name if hasattr(e, 'name') and e.name else e.attribute for e in dataset_embeddings]
+        target_data_list = [e.extra_data for e in dataset_embeddings]
         
-        resume_vectors_np = np.array(resume_vectors)
+        target_identifiers = [data.get(key_name, "") for data in target_data_list]
 
         # 2. 코사인 유사도 계산
-        similarity_matrix = cosine_similarity(resume_vectors_np, target_vectors)
+        similarity_matrix = cosine_similarity(np.array(resume_vectors), target_vectors)
 
         # 3. 각 데이터셋 항목별 '최대' 유사도 점수를 추출합니다.
         # axis=0은 각 열(항목)에서 최대값을 찾는다는 의미입니다.
         max_similarities = np.max(similarity_matrix, axis=0)
-        
+        max_similarities_positive = np.maximum(0, max_similarities)
+
+        # 결과를 pandas DataFrame으로 변환해서 계산된 모든 결과를 (이름, 점수) 형태로 DF에 담습니다.
+        df = pd.DataFrame({
+            'identifier': target_identifiers,
+            'score': max_similarities_positive,
+            'data': target_data_list
+        })
+
+        # 동일한 이름으로 그룹화하여 평균 점수를 계산합니다.
+        #  'name' 기준으로 그룹 묶고, score의 평균을 계산합니다.
+        grouped_scores = df.groupby('identifier').agg(
+            score=('score', 'mean'),
+            data=('data', 'first')
+        ).reset_index()
+
         # 4. 점수들을 백분위로 정규화합니다 (총합이 100이 되도록).
-        total_similarity = np.sum(max_similarities)
-        if total_similarity == 0:
-            # 모든 유사도가 0일 경우, 균등하게 점수를 분배하거나 0으로 처리합니다.
-            scores = [0] * len(target_names)
+        total_similarity = grouped_scores['score'].sum()
+        if total_similarity > 0:
+            grouped_scores['score'] = (grouped_scores['score'] / total_similarity) * 100
         else:
-            scores = (max_similarities / total_similarity) * 100
+            grouped_scores['score'] = 0
         
-        # 5. (이름, 점수) 튜플 리스트를 만들고 점수 순으로 정렬합니다.
-        results = sorted(
-            zip(target_names, scores),
-            key=lambda item: item[1],
-            reverse=True
-        )
-        
-        return results
+        # 5. 점수 순으로 정렬하고 결과를 반환합니다.
+        sorted_results = grouped_scores.sort_values(by='score', ascending=False)
+        final_results = []
+        for _, row in sorted_results.iterrows():
+            result_item = row['data']
+            result_item['score'] = round(row['score'], 2)
+            final_results.append(result_item)
+            
+        return final_results
 
     def analyze_resume_fitness(self, db: Session, resume_vectors: list) -> dict:
         """
@@ -250,22 +279,16 @@ class ResumeService:
 
         # 1. 직무 적합성 분석 (job 타입 데이터셋과 비교)
         job_embeddings = embedding_repo.get_all_by_type("job")
-        job_fitness_scores = self._get_itemwise_scores(resume_vectors, job_embeddings)
+        job_fitness_scores = self._get_itemwise_scores(resume_vectors, job_embeddings, key_name='name')
 
         # 2. 이력서 강점/보완점 분석 (resume 타입 데이터셋과 비교)
         resume_eval_embeddings = embedding_repo.get_all_by_type("resume")
-        resume_evaluation_scores = self._get_itemwise_scores(resume_vectors, resume_eval_embeddings)
+        resume_evaluation_scores = self._get_itemwise_scores(resume_vectors, resume_eval_embeddings, key_name='attribute')
         
         # 3. 최종 결과를 구조화하여 반환합니다.
         return {
-            "job_fitness": [
-                {"job_name": name, "score": round(score, 2)}
-                for name, score in job_fitness_scores
-            ],
-            "resume_evaluation": [
-                {"attribute": attr, "score": round(score, 2)}
-                for attr, score in resume_evaluation_scores
-            ]
+            "job_fitness": job_fitness_scores,
+            "resume_evaluation": resume_evaluation_scores
         }
     
 resume_service = ResumeService()

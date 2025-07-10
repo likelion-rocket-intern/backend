@@ -14,7 +14,7 @@ router = APIRouter(tags=["jinro"])
 
 
 # 한 유저에 대한 모든 결과값을 조회
-# 이때, 스키마? json? 
+# 이때, 스키마? json?
 @router.get("/user")
 async def get_jinro_by_user(db:SessionDep, current_user:CurrentUser):
     return JinroService().find_by_user_id(db, current_user.id)
@@ -28,7 +28,6 @@ async def get_jinro_by_user_latest(db:SessionDep, current_user:CurrentUser):
 # 커리어넷 v1 심리검사 문항 요청 (비동기)
 @router.get("/test-questions-v1")
 async def get_test_questions_v1(current_user:CurrentUser):
-
     url = "https://www.career.go.kr/inspct/openapi/test/questions"
     params = {
         "apikey": settings.JINRO_API_KEY,
@@ -67,6 +66,8 @@ async def post_test_report_v1(
     # 1. 커리어넷 검사 결과 요청
     report_url = "https://www.career.go.kr/inspct/openapi/test/report"
     headers = {"Content-Type": "application/json"}
+    body.apikey = settings.JINRO_API_KEY
+
     async with httpx.AsyncClient() as client:
         report_resp = await client.post(report_url, json=body.dict(), headers=headers)
 

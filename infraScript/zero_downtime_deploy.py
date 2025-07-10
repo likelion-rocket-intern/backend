@@ -72,6 +72,7 @@ class ServiceManager:
         os.system(
             f"docker run -d --name={name} --network=resume_matching "
             f"--network-alias=resume_matching "
+            f"-v /dockerProjects/resume_matching/datas:/app/datas "
             f"--restart unless-stopped -p {port}:18000 -e TZ=Asia/Seoul "
             f"--pull always ghcr.io/likelion-rocket-intern/ai-resume")
 

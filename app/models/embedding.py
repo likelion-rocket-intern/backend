@@ -4,18 +4,16 @@ from sqlmodel import SQLModel, Field
 from sqlalchemy import Column
 from pgvector.sqlalchemy import Vector
 from sqlalchemy.sql import func
+from sqlalchemy.dialects.postgresql import JSONB
 
 class Embedding(SQLModel, table=True):
 	__tablename__ = "embeddings"
 
 	id: int = Field(default=None, primary_key=True, index=True)
-	object_id: int = Field(index=True)
+	object_id: str = Field(index=True)
 	object_type: str = Field(index=True)
 	embedding: Optional[list[float]] = Field(sa_column=Column(Vector(1024)))
-	name: Optional[str] = None
-	skill: Optional[str] = None
-	attribute: Optional[str] = None
-	description: Optional[str] = None
+	extra_data: dict | None = Field(default=None, sa_column=Column(JSONB))
 	created_at: datetime = Field(
 		default=None,
 		sa_column_kwargs={
