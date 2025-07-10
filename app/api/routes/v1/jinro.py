@@ -11,6 +11,7 @@ from app.schemas.jinro import JinroTestReportRequest
 
 router = APIRouter(tags=["jinro"])
 
+# id에 따라 만들기
 @router.get("/{id}")
 async def get_jinro(id: int, db:SessionDep):
     result = JinroService().find_by_id(db,id)
@@ -19,7 +20,11 @@ async def get_jinro(id: int, db:SessionDep):
     else:
         return {"error": "해당 id의 결과가 없심더."}
 
-# 상태 요청(메인 페이지)
+# 한 유저에 대한 모든 결과값을 조회
+# 이때, 스키마의 배열로 반환시킬꺼임
+@router.get("/user/{id}")
+
+
 
 # 커리어넷 v1 심리검사 문항 요청 (비동기)
 @router.get("/test-questions-v1")

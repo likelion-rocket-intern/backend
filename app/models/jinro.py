@@ -8,8 +8,6 @@ if TYPE_CHECKING:
     from .user import User
 
 class Jinro(SQLModel, table=True):
-    __tablename__ = "jinro"
-    # TODO: 추후 종합 결과의 관계도 추가할것임
 
     id: int = Field(default=None, primary_key=True, index=True)
     user_id: int = Field(foreign_key="users.id", index=True)
@@ -25,5 +23,4 @@ class Jinro(SQLModel, table=True):
     
     # Relationship
     user: Optional["User"] = Relationship(back_populates="jinros")
-
-
+    jinro_results: List["JinroResult"] = Relationship(back_populates="jinro")
