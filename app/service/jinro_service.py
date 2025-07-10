@@ -7,6 +7,11 @@ from app.models.jinro import Jinro
 import json
 from app.core.redis import get_redis_client
 from typing import Optional
+from app.models.job_profile import JobProfile
+from typing import List, Dict
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+from sqlmodel import select
 
 
 class JinroService:
@@ -92,3 +97,38 @@ class JinroService:
     # id 가지고 조회
     def find_by_id(self, db: Session, id: int) -> Optional[Jinro]:
         return crud_jinro.get_by_id(db, id)
+    
+def calculate_similarity(user: List[float], session: Session) -> List[Dict]:
+    # DB에서 활성화된 직군 프로필 조회
+    job_profiles = session.exec(select(JobProfile).where(JobProfile.is_active == True)).all()
+    
+    if not job_profiles:
+        return []
+    
+    # 사용자 벡터 (2D 배열로 변환)
+    user_vector = np.array(user).reshape(1, -1)
+    
+    # 직군 프로필 벡터들 추출 (JobProfile 모델의 get_vector() 메서드 사용)
+    job_vectors = np.array([profile.get_vector() for profile in job_profiles])
+    
+    # 코사인 유사도 계산
+    similarities = cosine_similarity(user_vector, job_vectors).flatten()
+    
+    # 결과 생성
+    results = []
+    for i, (profile, similarity) in enumerate(zip(job_profiles, similarities)):
+        result = {
+            "job_type": profile.job_type,
+            "job_name_ko": profile.job_name_ko,
+            "similarity": similarity,
+            "percentage": round(similarity * 100, 2),
+            "rank": 0  # 정렬 후 설정
+        }
+        results.append(result)
+    
+    # 유사도 높은 순으로 정렬 및 순위 설정
+    results.sort(key=lambda x: x["similarity"], reverse=True)
+    for i, result in enumerate(results):
+        result["rank"] = i + 1
+    
+    return results
