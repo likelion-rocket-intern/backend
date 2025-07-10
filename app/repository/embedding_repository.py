@@ -1,0 +1,6 @@
+from typing import Protocol
+from app.models.embedding import Embedding
+
+class EmbeddingRepository(Protocol):
+    def exists(self, object_id: int, object_type: str) -> bool: ...
+    def save(self, embedding: Embedding) -> None: ...

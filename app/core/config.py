@@ -66,15 +66,15 @@ class Settings(BaseSettings):
 
     @computed_field  # type: ignore[prop-decorator]
     @property
-    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
-        return MultiHostUrl.build(
+    def SQLALCHEMY_DATABASE_URI(self) -> str:
+        return str(MultiHostUrl.build(
             scheme="postgresql+psycopg",
             username=self.POSTGRES_USER,
             password=self.POSTGRES_PASSWORD,
             host=self.POSTGRES_SERVER,
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
-        )
+        ))
 
     # Redis Settings
     REDIS_HOST: str = "localhost"
@@ -84,17 +84,20 @@ class Settings(BaseSettings):
 
     @computed_field
     @property
-    def REDIS_BROKER_URL(self) -> RedisDsn:
-        return MultiHostUrl.build(
+    def REDIS_BROKER_URL(self) -> str:
+        return str(MultiHostUrl.build(
             scheme="redis",
             host=self.REDIS_HOST,
             port=self.REDIS_PORT,
             path=str(self.REDIS_DB)
-        )
+        ))
     
     # OpenAI Settings
     OPENAI_API_KEY: str = ""
     OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
+
+    # 진로 API KEY
+    JINRO_API_KEY: str = ""
 
     # Embeddings Model 설정
     EMBBEDING_MODEL : str = ""

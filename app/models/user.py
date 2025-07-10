@@ -25,3 +25,4 @@ class User(SQLModel, table=True):
     )
 
     resumes: List["Resume"] = Relationship(back_populates="user")
+    jinros: List["Jinro"] = Relationship(back_populates="user")

@@ -80,7 +80,15 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             mkdir -p /dockerProjects/resume_matching/backend
+            mkdir -p /dockerProjects/resume_matching/datas
+            
+            # Download deployment script
             curl -o /dockerProjects/resume_matching/backend/zero_downtime_deploy.py https://raw.githubusercontent.com/${{ github.repository }}/main/infraScript/zero_downtime_deploy.py 
+            
+            # Download CSV files
+            curl -o /dockerProjects/resume_matching/datas/job_data.csv https://raw.githubusercontent.com/${{ github.repository }}/main/backend/datas/job_data.csv
+            curl -o /dockerProjects/resume_matching/datas/resume_data.csv https://raw.githubusercontent.com/${{ github.repository }}/main/backend/datas/resume_data.csv
+            
             chmod +x /dockerProjects/resume_matching/backend/zero_downtime_deploy.py
             python3 /dockerProjects/resume_matching/backend/zero_downtime_deploy.py 
             exit 0 

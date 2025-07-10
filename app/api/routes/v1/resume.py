@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query, UploadFile, File
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
 from fastapi.responses import Response
 from app.api.deps import SessionDep, CurrentUser
 from app.schemas.auth import KakaoLoginResponse, UserResponse
@@ -12,6 +12,7 @@ from app.schemas.resume import AnalysisResponse, TaskStatusResponse, ResumeDetai
 from app.schemas.status import TaskStatus
 from app.utils import storage
 
+
 router = APIRouter(tags=["resume"])
 
 @router.post("/analysis")
@@ -19,6 +20,8 @@ async def upload_resume(
     current_user: CurrentUser,
     session: SessionDep,
     file: UploadFile = File(...),
+    additional: str = Form(None),
+    manualResume: str = Form(None),
 )-> AnalysisResponse:
     try:
         timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
