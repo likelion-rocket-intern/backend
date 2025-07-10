@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from .user import User
 
 class Jinro(SQLModel, table=True):
+    __tablename__ = "jinro"
 
     id: int = Field(default=None, primary_key=True, index=True)
     user_id: int = Field(foreign_key="users.id", index=True)

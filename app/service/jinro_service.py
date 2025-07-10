@@ -1,12 +1,15 @@
 #이쪽은 repository
 
 
+from sys import version
 from sqlmodel import Session, null
 from app.crud.jinro import crud_jinro
+from app.crud.jinro_result import crud_jinro_result
 from app.models.jinro import Jinro
 import json
 from app.core.redis import get_redis_client
 from typing import Optional, List
+from app.models.jinro_result import JinroResult
 
 
 class JinroService:
@@ -41,8 +44,13 @@ class JinroService:
         
         return redis_key
 
+    
+# 여기를 다시 만들어봅시다
+# 일단 테스트를 찾고, 없으면 만들고
+# 있다면 그 테스트 id를 빌려와서 결과를 저장시키기
 
-    def add_test_result(self, db: Session, current_user_id: int, test_result: dict) -> int:
+    # 새로운 테스트가 떴으면 추가 하기
+    def add_new_test(self, db:Session, current_user_id: int, test_result:dict, version: str):
         # Redis에서 저장된 데이터 가져오기
         redis_client = get_redis_client()
         redis_key = f"jinro_test_{current_user_id}"
@@ -56,9 +64,6 @@ class JinroService:
             stored_test = temp_data.get("test")  # Redis에 저장된 test를 가져온다
         else:
             stored_test = None #여기에 예외처리를 해야 하는데
-        
-        jinro_count = len(crud_jinro.get_by_userid(db, current_user_id))
-        version = f"v_{jinro_count + 1}.0"
 
         # 결과를 저장
         new_jinro = Jinro(
@@ -68,17 +73,71 @@ class JinroService:
             test= stored_test,
         )
         new_jinro = crud_jinro.create(db, jinro=new_jinro)
+
         
         # Redis에서 임시 데이터 삭제 (테스트 완료 후 정리)
         if redis_data:
             redis_client.delete(redis_key)
         
-        return new_jinro.id
+        return new_jinro
+    
+    # 테스트 결과 추가하기
+
+    def add_test_result(self, db: Session, current_user_id: int, test_result: dict):
+        # 헤당 유저가 테스트를 치뤘다면 거기에 넣고 없다면 새로 jinro를 만들기
+        # 신규 유저가 테스트를 할 경우 없으니까 만들어야지
+        # TODO 그럼 만약에 테스트 자체가 새로 바뀔 경우에는? ->일단 보류
+        
+        # 없으면 추가
+        jinro_count = len(crud_jinro.get_by_userid(db, current_user_id))
+        if jinro_count == 0:
+            jinro = self.add_new_test(db, current_user_id, test_result, f"v_{jinro_count + 1}.0")
+        # 있으면 채신 버전에서 가져오기
+        else:
+            jinro = crud_jinro.get_latest_by_user_id(db, current_user_id)
+            if jinro is None:
+             raise ValueError("해당 user_id에 대한 Jinro가 존재하지 않습니다.")
+        
+        # 이후 테스트 결과에서 원하는 값만 추출하고 넣는 부분을 진행
+        scores = {f"w{i}": test_result.get(f"w{i}") for i in range(1, 9)}
+
+        # 버전도 채신 버전에서 가져오기
+        version_count = len(crud_jinro_result.get_by_jinro_id(db, jinro.id)) + 1
+
+
+        jinro_result = JinroResult( # 해당 진로검사 id
+            jinro_id=jinro.id,
+            version=version_count,  # 필요시 version 값
+            stability_score=scores["w1"] or -1,
+            creativity_score=scores["w2"] or -1,
+            social_service_score=scores["w3"] or -1,
+            ability_development_score=scores["w4"] or -1,
+            conservatism_score=scores["w5"] or -1,
+            social_recognition_score=scores["w6"] or -1,
+            autonomy_score=scores["w7"] or -1,
+            self_improvement_score=scores["w8"] or -1
+            # 아래는 예시로 상위 3개 직업군 정보도 넣어야 함
+            # first_job_name=result_data.get("jobs", [{}])[0].get("name", "") if result_data.get("jobs") else "",
+            # first_job_score=0.0,  # 실제 점수 필드가 있다면 여기에
+            # second_job_name=result_data.get("jobs", [{}])[1].get("name", "") if len(result_data.get("jobs") or []) > 1 else "",
+            # second_job_score=0.0,
+            # third_job_name=result_data.get("jobs", [{}])[2].get("name", "") if len(result_data.get("jobs") or []) > 2 else "",
+            # third_job_score=0.0,
+        )
+        
+        # 이제 저걸 저장
+        jinro_result = crud_jinro_result.create(db, jinro_result=jinro_result)
+
+        return jinro_result.id
     
     # id 가지고 조회
     def find_by_id(self, db: Session, id: int) -> Optional[Jinro]:
         return crud_jinro.get_by_id(db, id)
     
-    # 유저 아이디 가지고 조회
-    def find_by_user_id(self, db: Session, id: int)-> List[Jinro]:
-        return crud_jinro.get_by_userid(db, id)
+    # 유저 아이디 가지고  결과 조회
+    def find_by_user_id(self, db: Session, id: int)-> List[JinroResult]:
+        return crud_jinro_result.get_by_jinro_id(db, id)
+        # 여기서 스키마로 딱 바꾸면 좋은데
+    
+
+

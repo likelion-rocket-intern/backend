@@ -8,6 +8,9 @@ if TYPE_CHECKING:
     from .jinro import Jinro
 
 class JinroResult(SQLModel, table=True):
+
+    __tablename__ = "jinro_result"
+    
     id: int = Field(default=None, primary_key=True, index=True)
     jinro_id: int = Field(foreign_key="jinro.id", index=True)
 

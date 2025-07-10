@@ -1,6 +1,6 @@
 from pickletools import read_uint1
 from sqlmodel import Session, select
-from sqlalchemy import Column, JSON
+from sqlalchemy import Column, JSON, desc
 from app.models.jinro import Jinro
 from typing import Optional, List, Dict, Any
 
@@ -31,6 +31,15 @@ class CRUDJinro:
         query = select(Jinro)
         query = query.where(Jinro.user_id == user_id)
         return list(db.exec(query).all())
+    
+    def get_latest_by_user_id(self, db: Session, user_id: int) -> Optional[Jinro]:
+        query = (
+            select(Jinro)
+            .where(Jinro.user_id == user_id)
+            .order_by(desc(Jinro.version))
+            .limit(1)
+        )
+        return db.exec(query).first()
 
 # 인스턴스 생성
 crud_jinro = CRUDJinro()

@@ -11,20 +11,13 @@ from app.schemas.jinro import JinroTestReportRequest
 
 router = APIRouter(tags=["jinro"])
 
-# id에 따라 만들기
-@router.get("/{id}")
-async def get_jinro(id: int, db:SessionDep):
-    result = JinroService().find_by_id(db,id)
-    if result:
-        return result
-    else:
-        return {"error": "해당 id의 결과가 없심더."}
+
 
 # 한 유저에 대한 모든 결과값을 조회
-# 이때, 스키마의 배열로 반환시킬꺼임
-@router.get("/user/{id}")
-
-
+# 이때, 스키마? json? 
+@router.get("/user")
+async def get_jinro_by_user(db:SessionDep, current_user:CurrentUser):
+    return JinroService().find_by_user_id(db, current_user.id)
 
 # 커리어넷 v1 심리검사 문항 요청 (비동기)
 @router.get("/test-questions-v1")
@@ -127,3 +120,12 @@ async def post_test_report_v1(
         }
 
 
+# id에 따라 만들기
+# 아니 동적 경로는 아래에 내려놓아야 한다고???
+# @router.get("/{id}")
+# async def get_jinro(id: int, db:SessionDep):
+#     result = JinroService().find_by_id(db,id)
+#     if result:
+#         return result
+#     else:
+#         return {"error": "해당 id의 결과가 없심더."}

@@ -16,6 +16,5 @@ class ValueItem(BaseModel):
 
 
 class JinroTestScore(BaseModel):
-    comptdtm: str = Field(..., description="검사 완료 시간", examples=["2025-07-09T07:23:56.000+00:00"])
     values: List[ValueItem] = Field(..., description="가치관 목록")
-    
+
