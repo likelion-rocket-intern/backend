@@ -70,6 +70,7 @@ class JinroService:
         new_jinro = Jinro(
             user_id = current_user_id,
             version=version,
+            # 이 결과는 따로 빼놨으니 상관 없을지도
             test_result = test_result,
             test= stored_test,
         )
@@ -87,7 +88,7 @@ class JinroService:
     def add_test_result(self, db: Session, current_user_id: int, test_result: dict):
         # 헤당 유저가 테스트를 치뤘다면 거기에 넣고 없다면 새로 jinro를 만들기
         # 신규 유저가 테스트를 할 경우 없으니까 만들어야지
-        # TODO 그럼 만약에 테스트 자체가 새로 바뀔 경우에는? ->일단 보류
+        # 그럼 만약에 테스트 자체가 새로 바뀔 경우에는? -> 그리 되면 이후의 값들도 싹다 갈아 엎어야 해서 상관없을듯
         
         # 없으면 추가
         jinro_count = len(crud_jinro.get_by_userid(db, current_user_id))
@@ -101,7 +102,15 @@ class JinroService:
         
         # 이후 테스트 결과에서 원하는 값만 추출하고 넣는 부분을 진행
         scores = {f"w{i}": test_result.get(f"w{i}") for i in range(1, 9)}
+        # 스코어를 float로 변환
+        user_score = [float(i) if i is not None else 0.0 for i in scores.values()]
 
+        # result = 함수호출(user_score) #-> list로 반환, 여기만 함수 호출 바꾸면 됨
+
+        # 거기서 상위3종으로 
+        # top3 = result[:3]
+
+        
         # 버전도 채신 버전에서 가져오기
         version_count = len(crud_jinro_result.get_by_jinro_id(db, jinro.id)) + 1
 
@@ -118,12 +127,12 @@ class JinroService:
             autonomy_score=scores["w7"] or -1,
             self_improvement_score=scores["w8"] or -1
             # 아래는 예시로 상위 3개 직업군 정보도 넣어야 함
-            # first_job_name=result_data.get("jobs", [{}])[0].get("name", "") if result_data.get("jobs") else "",
-            # first_job_score=0.0,  # 실제 점수 필드가 있다면 여기에
-            # second_job_name=result_data.get("jobs", [{}])[1].get("name", "") if len(result_data.get("jobs") or []) > 1 else "",
-            # second_job_score=0.0,
-            # third_job_name=result_data.get("jobs", [{}])[2].get("name", "") if len(result_data.get("jobs") or []) > 2 else "",
-            # third_job_score=0.0,
+            # first_job_name=top3[0]["job_name_ko"] if len(top3) > 0 else "",
+            # first_job_score=top3[0]["percentage"] if len(top3) > 0 else 0.0,
+            # second_job_name=top3[1]["job_name_ko"] if len(top3) > 1 else "",
+            # second_job_score=top3[1]["percentage"] if len(top3) > 1 else 0.0,
+            # third_job_name=top3[2]["job_name_ko"] if len(top3) > 2 else "",
+            # third_job_score=top3[2]["percentage"] if len(top3) > 2 else 0.0
         )
         
         # 이제 저걸 저장
