@@ -1,6 +1,7 @@
 import secrets
 import warnings
 from typing import Annotated, Any, Literal
+import os
 
 from pydantic import (
     AnyUrl,
@@ -36,7 +37,10 @@ class Settings(BaseSettings):
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    FRONTEND_HOST: str = "http://localhost:3000"
+    FRONTEND_HOST: str = os.getenv("FRONTEND_HOST", "http://localhost:3000")
+    BACKEND_HOST: str = os.getenv("BACKEND_HOST", "https://api.ai-resume.kknaks.site")
+    USE_HTTPS: bool = os.getenv("USE_HTTPS", "false").lower() == "true"
+    COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "kknaks.site")
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
     # OAuth2 Settings
