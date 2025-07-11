@@ -6,6 +6,7 @@ from app.core.db import engine
 from app.service.embedding_service import DataEmbedder
 from app.repository.sql_embedding_repository import SqlEmbeddingRepository
 from app.models.job_profile import JobProfile
+from app.models.embedding import Embedding
 from sqlmodel import select
 import json
 
@@ -123,7 +124,7 @@ def init_job_profiles():
 
 def main() -> None:
     logger.info("Starting embedding initialization")
-    init_embedding()
+    init_embedding(engine)
     init_job_profiles()
     logger.info("Finished embedding initialization")
 
