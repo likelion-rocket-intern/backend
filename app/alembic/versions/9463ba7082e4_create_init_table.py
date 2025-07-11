@@ -1,18 +1,18 @@
-"""create init table
+"""create init_table
 
-Revision ID: 93df992e3a58
+Revision ID: 9463ba7082e4
 Revises: 
-Create Date: 2025-07-10 14:15:16.117545
+Create Date: 2025-07-11 15:37:43.217587
 
 """
 from alembic import op
 import sqlalchemy as sa
 import sqlmodel.sql.sqltypes
 from sqlalchemy.dialects import postgresql
-from pgvector.sqlalchemy import Vector
+import pgvector.sqlalchemy
 
 # revision identifiers, used by Alembic.
-revision = '93df992e3a58'
+revision = '9463ba7082e4'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -24,7 +24,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('object_id', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('object_type', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('embedding', Vector(dim=1024), nullable=True),
+    sa.Column('embedding', pgvector.sqlalchemy.vector.VECTOR(dim=1024), nullable=True),
     sa.Column('extra_data', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
@@ -33,6 +33,24 @@ def upgrade():
     op.create_index(op.f('ix_embeddings_id'), 'embeddings', ['id'], unique=False)
     op.create_index(op.f('ix_embeddings_object_id'), 'embeddings', ['object_id'], unique=False)
     op.create_index(op.f('ix_embeddings_object_type'), 'embeddings', ['object_type'], unique=False)
+    op.create_table('job_profiles',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('job_type', sqlmodel.sql.sqltypes.AutoString(length=50), nullable=False),
+    sa.Column('job_name_ko', sqlmodel.sql.sqltypes.AutoString(length=50), nullable=False),
+    sa.Column('stability', sa.Float(), nullable=False),
+    sa.Column('creativity', sa.Float(), nullable=False),
+    sa.Column('social_service', sa.Float(), nullable=False),
+    sa.Column('ability_development', sa.Float(), nullable=False),
+    sa.Column('conservatism', sa.Float(), nullable=False),
+    sa.Column('social_recognition', sa.Float(), nullable=False),
+    sa.Column('autonomy', sa.Float(), nullable=False),
+    sa.Column('self_improvement', sa.Float(), nullable=False),
+    sa.Column('description', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_job_profiles_id'), 'job_profiles', ['id'], unique=False)
+    op.create_index(op.f('ix_job_profiles_job_type'), 'job_profiles', ['job_type'], unique=True)
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('social_type', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
@@ -75,12 +93,39 @@ def upgrade():
     )
     op.create_index(op.f('ix_resumes_id'), 'resumes', ['id'], unique=False)
     op.create_index(op.f('ix_resumes_user_id'), 'resumes', ['user_id'], unique=False)
+    op.create_table('jinro_result',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('jinro_id', sa.Integer(), nullable=False),
+    sa.Column('version', sa.Integer(), nullable=False),
+    sa.Column('stability_score', sa.Integer(), nullable=False),
+    sa.Column('creativity_score', sa.Integer(), nullable=False),
+    sa.Column('social_service_score', sa.Integer(), nullable=False),
+    sa.Column('ability_development_score', sa.Integer(), nullable=False),
+    sa.Column('conservatism_score', sa.Integer(), nullable=False),
+    sa.Column('social_recognition_score', sa.Integer(), nullable=False),
+    sa.Column('autonomy_score', sa.Integer(), nullable=False),
+    sa.Column('self_improvement_score', sa.Integer(), nullable=False),
+    sa.Column('first_job_id', sa.Integer(), nullable=False),
+    sa.Column('first_job_score', sa.Float(), nullable=False),
+    sa.Column('second_job_id', sa.Integer(), nullable=False),
+    sa.Column('second_job_score', sa.Float(), nullable=False),
+    sa.Column('third_job_id', sa.Integer(), nullable=False),
+    sa.Column('third_job_score', sa.Float(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.ForeignKeyConstraint(['first_job_id'], ['job_profiles.id'], ),
+    sa.ForeignKeyConstraint(['jinro_id'], ['jinro.id'], ),
+    sa.ForeignKeyConstraint(['second_job_id'], ['job_profiles.id'], ),
+    sa.ForeignKeyConstraint(['third_job_id'], ['job_profiles.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_jinro_result_id'), 'jinro_result', ['id'], unique=False)
+    op.create_index(op.f('ix_jinro_result_jinro_id'), 'jinro_result', ['jinro_id'], unique=False)
     op.create_table('resume_embeddings',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('resume_id', sa.Integer(), nullable=False),
     sa.Column('chunk_index', sa.Integer(), nullable=False),
     sa.Column('content', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-    sa.Column('embedding', Vector(dim=1024), nullable=True),
+    sa.Column('embedding', pgvector.sqlalchemy.vector.VECTOR(dim=1024), nullable=True),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
     sa.ForeignKeyConstraint(['resume_id'], ['resumes.id'], ),
     sa.PrimaryKeyConstraint('id')
@@ -95,6 +140,9 @@ def downgrade():
     op.drop_index(op.f('ix_resume_embeddings_resume_id'), table_name='resume_embeddings')
     op.drop_index(op.f('ix_resume_embeddings_id'), table_name='resume_embeddings')
     op.drop_table('resume_embeddings')
+    op.drop_index(op.f('ix_jinro_result_jinro_id'), table_name='jinro_result')
+    op.drop_index(op.f('ix_jinro_result_id'), table_name='jinro_result')
+    op.drop_table('jinro_result')
     op.drop_index(op.f('ix_resumes_user_id'), table_name='resumes')
     op.drop_index(op.f('ix_resumes_id'), table_name='resumes')
     op.drop_table('resumes')
@@ -105,6 +153,9 @@ def downgrade():
     op.drop_index(op.f('ix_users_social_id'), table_name='users')
     op.drop_index(op.f('ix_users_id'), table_name='users')
     op.drop_table('users')
+    op.drop_index(op.f('ix_job_profiles_job_type'), table_name='job_profiles')
+    op.drop_index(op.f('ix_job_profiles_id'), table_name='job_profiles')
+    op.drop_table('job_profiles')
     op.drop_index(op.f('ix_embeddings_object_type'), table_name='embeddings')
     op.drop_index(op.f('ix_embeddings_object_id'), table_name='embeddings')
     op.drop_index(op.f('ix_embeddings_id'), table_name='embeddings')

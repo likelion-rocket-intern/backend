@@ -34,7 +34,7 @@ source .venv/bin/activate
 uv pip install -e . 
 
 # 4-1. DB 버전업
-alembic revision --autogenerate -m "create table"
+alembic revision --autogenerate -m "create init_table"
 
 # 4-2. DB 마이그레이션 
 alembic upgrade head

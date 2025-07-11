@@ -1,122 +1,122 @@
 {
-  "백엔드 개발자": {
-    "안정성": 5.0,
-    "창의성": 3.5,
-    "사회봉사": 2.5,
-    "능력발휘": 5.0,
-    "보수": 4.5,
-    "사회적 인정": 4.0,
-    "자율성": 4.0,
-    "자기계발": 4.5
+  "backend_developer": {
+    "stability": 5.0,
+    "creativity": 3.5,
+    "social_service": 2.5,
+    "ability_development": 5.0,
+    "conservatism": 4.5,
+    "social_recognition": 4.0,
+    "autonomy": 4.0,
+    "self_improvement": 4.5
   },
-  "프론트엔드 개발자": {
-    "안정성": 3.5,
-    "창의성": 5.5,
-    "사회봉사": 2.5,
-    "능력발휘": 5.0,
-    "보수": 4.0,
-    "사회적 인정": 4.0,
-    "자율성": 5.5,
-    "자기계발": 5.0
+  "frontend_developer": {
+    "stability": 3.5,
+    "creativity": 5.5,
+    "social_service": 2.5,
+    "ability_development": 5.0,
+    "conservatism": 4.0,
+    "social_recognition": 4.0,
+    "autonomy": 5.5,
+    "self_improvement": 5.0
   },
-  "AI 개발자": {
-    "안정성": 3.5,
-    "창의성": 4.5,
-    "사회봉사": 3.0,
-    "능력발휘": 5.5,
-    "보수": 5.5,
-    "사회적 인정": 5.5,
-    "자율성": 4.0,
-    "자기계발": 6.0
+  "ai_developer": {
+    "stability": 3.5,
+    "creativity": 4.5,
+    "social_service": 3.0,
+    "ability_development": 5.5,
+    "conservatism": 5.5,
+    "social_recognition": 5.5,
+    "autonomy": 4.0,
+    "self_improvement": 6.0
   },
-  "마케터": {
-    "안정성": 3.0,
-    "창의성": 5.0,
-    "사회봉사": 3.5,
-    "능력발휘": 4.5,
-    "보수": 3.5,
-    "사회적 인정": 4.0,
-    "자율성": 4.5,
-    "자기계발": 4.5
+  "marketer": {
+    "stability": 3.0,
+    "creativity": 5.0,
+    "social_service": 3.5,
+    "ability_development": 4.5,
+    "conservatism": 3.5,
+    "social_recognition": 4.0,
+    "autonomy": 4.5,
+    "self_improvement": 4.5
   },
-  "사업개발매니저": {
-    "안정성": 3.5,
-    "창의성": 4.5,
-    "사회봉사": 3.0,
-    "능력발휘": 5.0,
-    "보수": 4.5,
-    "사회적 인정": 4.5,
-    "자율성": 5.0,
-    "자기계발": 4.5
+  "business_development_manager": {
+    "stability": 3.5,
+    "creativity": 4.5,
+    "social_service": 3.0,
+    "ability_development": 5.0,
+    "conservatism": 4.5,
+    "social_recognition": 4.5,
+    "autonomy": 5.0,
+    "self_improvement": 4.5
   },
-  "게임 개발자": {
-    "안정성": 3.0,
-    "창의성": 6.0,
-    "사회봉사": 2.0,
-    "능력발휘": 5.0,
-    "보수": 4.0,
-    "사회적 인정": 4.5,
-    "자율성": 4.5,
-    "자기계발": 5.0
+  "game_developer": {
+    "stability": 3.0,
+    "creativity": 6.0,
+    "social_service": 2.0,
+    "ability_development": 5.0,
+    "conservatism": 4.0,
+    "social_recognition": 4.5,
+    "autonomy": 4.5,
+    "self_improvement": 5.0
   },
-  "UI/UX 디자이너": {
-    "안정성": 3.0,
-    "창의성": 6.0,
-    "사회봉사": 3.5,
-    "능력발휘": 4.5,
-    "보수": 3.5,
-    "사회적 인정": 4.0,
-    "자율성": 5.5,
-    "자기계발": 4.5
+  "ui_ux_designer": {
+    "stability": 3.0,
+    "creativity": 6.0,
+    "social_service": 3.5,
+    "ability_development": 4.5,
+    "conservatism": 3.5,
+    "social_recognition": 4.0,
+    "autonomy": 5.5,
+    "self_improvement": 4.5
   },
-  "임베디드 개발자": {
-    "안정성": 4.5,
-    "창의성": 3.5,
-    "사회봉사": 2.5,
-    "능력발휘": 5.0,
-    "보수": 4.0,
-    "사회적 인정": 4.0,
-    "자율성": 3.5,
-    "자기계발": 4.5
+  "embedded_developer": {
+    "stability": 4.5,
+    "creativity": 3.5,
+    "social_service": 2.5,
+    "ability_development": 5.0,
+    "conservatism": 4.0,
+    "social_recognition": 4.0,
+    "autonomy": 3.5,
+    "self_improvement": 4.5
   },
-  "클라우드 엔지니어": {
-    "안정성": 5.0,
-    "창의성": 3.5,
-    "사회봉사": 2.5,
-    "능력발휘": 5.0,
-    "보수": 5.0,
-    "사회적 인정": 4.5,
-    "자율성": 4.0,
-    "자기계발": 5.0
+  "cloud_engineer": {
+    "stability": 5.0,
+    "creativity": 3.5,
+    "social_service": 2.5,
+    "ability_development": 5.0,
+    "conservatism": 5.0,
+    "social_recognition": 4.5,
+    "autonomy": 4.0,
+    "self_improvement": 5.0
   },
-  "데브옵스 & 인프라": {
-    "안정성": 5.5,
-    "창의성": 3.0,
-    "사회봉사": 2.5,
-    "능력발휘": 5.0,
-    "보수": 5.0,
-    "사회적 인정": 4.0,
-    "자율성": 3.5,
-    "자기계발": 4.5
+  "devops_infrastructure": {
+    "stability": 5.5,
+    "creativity": 3.0,
+    "social_service": 2.5,
+    "ability_development": 5.0,
+    "conservatism": 5.0,
+    "social_recognition": 4.0,
+    "autonomy": 3.5,
+    "self_improvement": 4.5
   },
-  "데이터 엔지니어": {
-    "안정성": 4.5,
-    "창의성": 3.5,
-    "사회봉사": 3.0,
-    "능력발휘": 5.0,
-    "보수": 4.5,
-    "사회적 인정": 4.5,
-    "자율성": 4.0,
-    "자기계발": 5.0
+  "data_engineer": {
+    "stability": 4.5,
+    "creativity": 3.5,
+    "social_service": 3.0,
+    "ability_development": 5.0,
+    "conservatism": 4.5,
+    "social_recognition": 4.5,
+    "autonomy": 4.0,
+    "self_improvement": 5.0
   },
-  "앱 개발자": {
-    "안정성": 4.0,
-    "창의성": 5.0,
-    "사회봉사": 2.5,
-    "능력발휘": 5.0,
-    "보수": 4.0,
-    "사회적 인정": 4.0,
-    "자율성": 4.5,
-    "자기계발": 4.5
+  "app_developer": {
+    "stability": 4.0,
+    "creativity": 5.0,
+    "social_service": 2.5,
+    "ability_development": 5.0,
+    "conservatism": 4.0,
+    "social_recognition": 4.0,
+    "autonomy": 4.5,
+    "self_improvement": 4.5
   }
 }

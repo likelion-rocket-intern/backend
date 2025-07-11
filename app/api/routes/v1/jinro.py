@@ -7,9 +7,23 @@ import asyncio
 from app.api.deps import SessionDep, CurrentUser
 from app.service.jinro_service import JinroService
 from app.core.config import settings
-from app.schemas.jinro import JinroTestReportRequest
+from app.schemas.jinro import JinroTestReportRequest, JinroResponse
 
 router = APIRouter(tags=["jinro"])
+
+
+
+# 한 유저에 대한 모든 결과값을 조회
+# 이때, 스키마? json?
+@router.get("/user")
+async def get_jinro_by_user(db:SessionDep, current_user:CurrentUser):
+    return JinroService().find_by_user_id(db, current_user.id)
+
+# 채신 버전 결과만 조회
+@router.get("/user/latest")
+async def get_jinro_by_user_latest(db:SessionDep, current_user:CurrentUser):
+    return JinroService().find_by_user_id_latest(db, current_user.id)
+
 
 # 커리어넷 v1 심리검사 문항 요청 (비동기)
 @router.get("/test-questions-v1")
@@ -35,14 +49,6 @@ async def get_test_questions_v1(current_user:CurrentUser):
             "detail": response.text
         }
 
-@router.get("/{id}")
-async def get_jinro(id: int, db:SessionDep):
-    result = JinroService().find_by_id(db,id)
-    if result:
-        return result
-    else:
-        return {"error": "해당 id의 결과가 없심더."}
-
 # 검사 결과 요청 (비동기)
 @router.post("/test-report-v1")
 async def post_test_report_v1(
@@ -61,7 +67,7 @@ async def post_test_report_v1(
     report_url = "https://www.career.go.kr/inspct/openapi/test/report"
     headers = {"Content-Type": "application/json"}
     body.apikey = settings.JINRO_API_KEY
-    
+
     async with httpx.AsyncClient() as client:
         report_resp = await client.post(report_url, json=body.dict(), headers=headers)
 
@@ -120,4 +126,13 @@ async def post_test_report_v1(
         "detail": "url에서 seq를 추출하는데 실패했습니다"
         }
 
-
+@router.get("/{id}", response_model=JinroResponse)
+async def get_jinro(id: int, db:SessionDep):
+    result = JinroService().find_by_id(db,id)
+    if result:
+        return result
+    else:
+        return {
+            "error": "해당 id의 결과가 없습니다.",
+            "status_code": 404
+        }
