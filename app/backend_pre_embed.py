@@ -1,7 +1,7 @@
 import logging
 import os
 from sqlmodel import Session
-
+from sqlalchemy import Engine
 from app.core.db import engine
 from app.service.embedding_service import DataEmbedder
 from app.repository.sql_embedding_repository import SqlEmbeddingRepository
@@ -14,11 +14,14 @@ logger = logging.getLogger(__name__)
 
 DATA_DIR = "datas/" # 데이터셋 폴더 경로 상수 정의
 
-def init_embedding():
+def init_embedding(db_engine: Engine):
     if not os.path.exists(DATA_DIR):
         logger.warning(f"데이터 폴더 '{DATA_DIR}'를 찾을 수 없어 임베딩을 건너뜁니다.")
         return
     
+    Embedding.metadata.create_all(db_engine)
+    logger.info("`embeddings` 테이블 생성 또는 확인 완료.")
+
     # DB 세션 생성
     with Session(engine) as session:
         # Repository 인스턴스 생성 (의존성 주입)
