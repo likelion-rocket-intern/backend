@@ -80,7 +80,7 @@ def send_resume_analysis(
                 new_resume.resume_embeddings = [
                     ResumeEmbedding(
                         chunk_index=idx,
-                        content=chunk,
+                        content=chunk.page_content,
                         embedding=vector
                     )
                     for idx, (chunk, vector) in enumerate(zip(chunks, vectors))
@@ -89,8 +89,8 @@ def send_resume_analysis(
                 # 5. 한 트랜잭션으로 저장
                 session.add(new_resume)
                 
-                # 분석 결과 업데이트
-                new_resume.analysis_result = "Analysis completed"
+                # # 분석 결과 업데이트
+                # new_resume.analysis_result = "Analysis completed"
                 
                 # 트랜잭션 자동 commit
                 # --- 5. (확장) 이력서 종합 적합도 분석 ---
@@ -106,8 +106,9 @@ def send_resume_analysis(
 
                 new_resume.analysis_result = analysis_result
                 session.add(new_resume) # 변경된 객체 세션에 추가
-                session.commit() # DB에 변경사항 반영
+                session.flush()
                 session.refresh(new_resume) # DB에서 최신 상태로 새로고침
+                session.commit() # DB에 변경사항 반영
             
             # 분석 완료 후 상태 업데이트
             result = {
