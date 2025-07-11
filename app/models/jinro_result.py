@@ -6,6 +6,7 @@ from typing import Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .jinro import Jinro
+    from .job_profile import JobProfile
 
 class JinroResult(SQLModel, table=True):
 
@@ -27,20 +28,21 @@ class JinroResult(SQLModel, table=True):
     self_improvement_score: int = Field(..., description="자기계발 점수")
     
     # 상위 3개 직업군 정보
-    # first_job_name: str = Field(..., description="첫 번째 유사 직업군명")
-    # first_job_score: float = Field(..., description="첫 번째 직업군 유사도 점수")
-    
-    # second_job_name: str = Field(..., description="두 번째 유사 직업군명")
-    # second_job_score: float = Field(..., description="두 번째 직업군 유사도 점수")
-    
-    # third_job_name: str = Field(..., description="세 번째 유사 직업군명")
-    # third_job_score: float = Field(..., description="세 번째 직업군 유사도 점수")
+    first_job_id: int = Field(..., foreign_key="job_profiles.id", description="첫 번째 유사 직업군 id")
+    first_job_score: float = Field(..., description="첫 번째 유사 직업군 점수")
+    second_job_id: int = Field(..., foreign_key="job_profiles.id", description="두 번째 유사 직업군 id")
+    second_job_score: float = Field(..., description="두 번째 유사 직업군 점수")
+    third_job_id: int = Field(..., foreign_key="job_profiles.id", description="세 번째 유사 직업군 id")
+    third_job_score: float = Field(..., description="세 번째 유사 직업군 점수")
     
     created_at: datetime = Field(
         default_factory=func.now,
         sa_column_kwargs={"server_default": func.now()}
     )
     
-    # Relationship
+    # Relationships
     jinro: Optional["Jinro"] = Relationship(back_populates="jinro_results")
+    first_job: Optional["JobProfile"] = Relationship(back_populates="first_job_results", sa_relationship_kwargs={"foreign_keys": "[JinroResult.first_job_id]"})
+    second_job: Optional["JobProfile"] = Relationship(back_populates="second_job_results", sa_relationship_kwargs={"foreign_keys": "[JinroResult.second_job_id]"})
+    third_job: Optional["JobProfile"] = Relationship(back_populates="third_job_results", sa_relationship_kwargs={"foreign_keys": "[JinroResult.third_job_id]"})
 

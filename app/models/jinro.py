@@ -18,7 +18,7 @@ class Jinro(SQLModel, table=True):
     test_result: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
     # 문제
     test: Optional[Dict[str, Any]] = Field(default=None, sa_column=Column(JSON))
-    created_at: datetimㄴe = Field(
+    created_at: datetime = Field(
         default_factory=func.now,
         sa_column_kwargs={"server_default": func.now()}
     )

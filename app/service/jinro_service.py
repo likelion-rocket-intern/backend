@@ -9,8 +9,13 @@ from app.crud.jinro_result import crud_jinro_result
 from app.models.jinro import Jinro
 import json
 from app.core.redis import get_redis_client
-from typing import Optional, List
+from typing import Optional
 from app.models.jinro_result import JinroResult
+from app.models.job_profile import JobProfile
+from typing import List, Dict
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+from sqlmodel import select
 
 
 class JinroService:
@@ -105,10 +110,12 @@ class JinroService:
         # 스코어를 float로 변환
         user_score = [float(i) if i is not None else 0.0 for i in scores.values()]
 
+        result = self.calculate_similarity(user_score, db)
+
         # result = 함수호출(user_score) #-> list로 반환, 여기만 함수 호출 바꾸면 됨
 
         # 거기서 상위3종으로 
-        # top3 = result[:3]
+        top3 = result[:3]
 
         
         # 버전도 채신 버전에서 가져오기
@@ -125,14 +132,13 @@ class JinroService:
             conservatism_score=scores["w5"] or -1,
             social_recognition_score=scores["w6"] or -1,
             autonomy_score=scores["w7"] or -1,
-            self_improvement_score=scores["w8"] or -1
-            # 아래는 예시로 상위 3개 직업군 정보도 넣어야 함
-            # first_job_name=top3[0]["job_name_ko"] if len(top3) > 0 else "",
-            # first_job_score=top3[0]["percentage"] if len(top3) > 0 else 0.0,
-            # second_job_name=top3[1]["job_name_ko"] if len(top3) > 1 else "",
-            # second_job_score=top3[1]["percentage"] if len(top3) > 1 else 0.0,
-            # third_job_name=top3[2]["job_name_ko"] if len(top3) > 2 else "",
-            # third_job_score=top3[2]["percentage"] if len(top3) > 2 else 0.0
+            self_improvement_score=scores["w8"] or -1,
+            first_job_id=top3[0]["id"],
+            first_job_score=top3[0]["percentage"],
+            second_job_id=top3[1]["id"],
+            second_job_score=top3[1]["percentage"],
+            third_job_id=top3[2]["id"],
+            third_job_score=top3[2]["percentage"]
         )
         
         # 이제 저걸 저장
@@ -162,3 +168,40 @@ class JinroService:
         return crud_jinro_result.get_latest_by_jinro_id(db, jinro.id)
 
 
+
+    
+    def calculate_similarity(self, user: List[float], session: Session) -> List[Dict]:
+        # DB에서 활성화된 직군 프로필 조회
+        job_profiles = session.exec(select(JobProfile).where(JobProfile.is_active == True)).all()
+        
+        if not job_profiles:
+            return []
+        
+        # 사용자 벡터 (2D 배열로 변환)
+        user_vector = np.array(user).reshape(1, -1)
+        
+        # 직군 프로필 벡터들 추출 (JobProfile 모델의 get_vector() 메서드 사용)
+        job_vectors = np.array([profile.get_vector() for profile in job_profiles])
+        
+        # 코사인 유사도 계산
+        similarities = cosine_similarity(user_vector, job_vectors).flatten()
+        
+        # 결과 생성
+        results = []
+        for i, (profile, similarity) in enumerate(zip(job_profiles, similarities)):
+            result = {
+                "id": profile.id,
+                "job_type": profile.job_type,
+                "job_name_ko": profile.job_name_ko,
+                "similarity": similarity,
+                "percentage": round(similarity * 100, 2),
+                "rank": 0  # 정렬 후 설정
+            }
+            results.append(result)
+        
+        # 유사도 높은 순으로 정렬 및 순위 설정
+        results.sort(key=lambda x: x["similarity"], reverse=True)
+        for i, result in enumerate(results):
+            result["rank"] = i + 1
+        
+        return results

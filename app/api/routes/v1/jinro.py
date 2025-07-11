@@ -7,7 +7,7 @@ import asyncio
 from app.api.deps import SessionDep, CurrentUser
 from app.service.jinro_service import JinroService
 from app.core.config import settings
-from app.schemas.jinro import JinroTestReportRequest
+from app.schemas.jinro import JinroTestReportRequest, JinroResponse
 
 router = APIRouter(tags=["jinro"])
 
@@ -126,13 +126,13 @@ async def post_test_report_v1(
         "detail": "url에서 seq를 추출하는데 실패했습니다"
         }
 
-
-# id에 따라 만들기
-# 아니 동적 경로는 아래에 내려놓아야 한다고???
-# @router.get("/{id}")
-# async def get_jinro(id: int, db:SessionDep):
-#     result = JinroService().find_by_id(db,id)
-#     if result:
-#         return result
-#     else:
-#         return {"error": "해당 id의 결과가 없심더."}z
+@router.get("/{id}", response_model=JinroResponse)
+async def get_jinro(id: int, db:SessionDep):
+    result = JinroService().find_by_id(db,id)
+    if result:
+        return result
+    else:
+        return {
+            "error": "해당 id의 결과가 없습니다.",
+            "status_code": 404
+        }

@@ -5,5 +5,6 @@ from app.models.resume import Resume
 from app.models.resume_embedding import ResumeEmbedding
 from app.models.embedding import Embedding
 from app.models.jinro import Jinro
+from app.models.job_profile import JobProfile
 
-__all__ = ["User", "Resume", "ResumeEmbedding", "Embedding", "SQLModel", "Jinro", "JinroResult"]
+__all__ = ["User", "Resume", "ResumeEmbedding", "Embedding", "SQLModel", "Jinro", "JinroResult", "JobProfile"]

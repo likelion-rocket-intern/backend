@@ -1,6 +1,7 @@
 from pickletools import read_uint1
 from sqlmodel import Session, select
 from sqlalchemy import Column, JSON, desc
+from sqlalchemy.orm import joinedload
 from app.models.jinro import Jinro
 from typing import Optional, List, Dict, Any
 
@@ -17,7 +18,11 @@ class CRUDJinro:
         return jinro
 
     def get_by_id(self, db: Session, id: int) -> Optional[Jinro]:
-        return db.get(Jinro, id)
+        query = select(Jinro).where(Jinro.id == id).options(
+            joinedload(Jinro.user),
+            joinedload(Jinro.jinro_results)
+        )
+        return db.exec(query).first()
 
     # # 한 유저id에서 모든 목록, 혹은 전원 조회
     # def get_multi(self, db: Session, user_id: Optional[int] = None) -> List[Jinro]:
