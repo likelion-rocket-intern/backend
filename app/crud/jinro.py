@@ -4,6 +4,7 @@ from sqlalchemy import Column, JSON, desc
 from sqlalchemy.orm import joinedload
 from app.models.jinro import Jinro
 from typing import Optional, List, Dict, Any
+from app.models.jinro_result import JinroResult
 
 class CRUDJinro:
     def create(
@@ -18,10 +19,7 @@ class CRUDJinro:
         return jinro
 
     def get_by_id(self, db: Session, id: int) -> Optional[Jinro]:
-        query = select(Jinro).where(Jinro.id == id).options(
-            joinedload(Jinro.user),
-            joinedload(Jinro.jinro_results)
-        )
+        query = select(Jinro).where(Jinro.id == id)
         return db.exec(query).first()
 
     # # 한 유저id에서 모든 목록, 혹은 전원 조회

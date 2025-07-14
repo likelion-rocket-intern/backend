@@ -17,8 +17,11 @@ class ResumeDetailResponse(BaseModel):
     id: int
     user_id: int
     version: str
-    file_path: str
-    analysis_result: str
+    original_filename: str | None = None
+    upload_filename: str | None = None
+    file_url: str | None = None
+    file_path: str | None = None  # For backward compatibility
+    analysis_result: str | dict
     created_at: datetime
 
 class ResumeListResponse(BaseModel):

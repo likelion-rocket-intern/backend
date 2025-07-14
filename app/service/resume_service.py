@@ -49,11 +49,19 @@ class ResumeService:
     def get_by_id(
         self,
         db: Session,
-        resume_id: int
+        resume_id: int,
+        user_id: int
     ) -> Optional[Resume]:
         resume = resume_crud.get_by_id(db=db, resume_id=resume_id)
+        if resume.user_id != user_id:
+            raise HTTPException(
+                status_code=403,
+                detail="해당 이력서는 접근 권한이 없습니다."
+            )
         if not resume:
-            raise HTTPException(status_code=404, detail="Resume not found")
+            raise HTTPException(
+                status_code=404, 
+                detail="Resume not found")
         return resume
 
     def get_by_user_id(
@@ -284,13 +292,21 @@ class ResumeService:
         job_fitness_scores = self._get_itemwise_scores(resume_vectors, job_embeddings, key_name='name')
 
         # 2. 이력서 강점/보완점 분석 (resume 타입 데이터셋과 비교)
-        resume_eval_embeddings = embedding_repo.get_all_by_type("resume")
-        resume_evaluation_scores = self._get_itemwise_scores(resume_vectors, resume_eval_embeddings, key_name='attribute')
-        
+        # 2-1 강점 분석
+        strengths_embeddings = embedding_repo.get_all_by_type("strengths")
+        strengths_evaluation_scores = self._get_itemwise_scores(resume_vectors, strengths_embeddings, key_name='attribute')
+
+        # 2-2 보완점 분석
+        weaknesses_embeddings = embedding_repo.get_all_by_type("weaknesses")
+        weaknesses_evaluation_scores = self._get_itemwise_scores(resume_vectors, weaknesses_embeddings, key_name='attribute')
+
         # 3. 최종 결과를 구조화하여 반환합니다.
         return {
             "job_fitness": job_fitness_scores,
-            "resume_evaluation": resume_evaluation_scores
-        }
+            "resume_evaluation": {
+                    "strengths": strengths_evaluation_scores,
+                    "weaknesses": weaknesses_evaluation_scores
+                }
+            }
     
 resume_service = ResumeService()

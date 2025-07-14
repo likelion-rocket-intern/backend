@@ -144,11 +144,17 @@ class JinroService:
         # 이제 저걸 저장
         jinro_result = crud_jinro_result.create(db, jinro_result=jinro_result)
 
-        return jinro_result.id
+        return jinro.id
     
     # id 가지고 조회
-    def find_by_id(self, db: Session, id: int) -> Optional[Jinro]:
-        return crud_jinro.get_by_id(db, id)
+    def find_by_id(self, db: Session, id: int, user_id: int) -> Optional[Jinro]:
+        result = crud_jinro.get_by_id(db, id)
+        if result.user_id != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="해당 결과는 접근 권한이 없습니다."
+            )
+        return result
     
     # 유저 아이디 가지고 결과 조회
     def find_by_user_id(self, db: Session, user_id: int)-> List[JinroResult]:
