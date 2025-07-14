@@ -12,10 +12,7 @@ from app.schemas.jinro import JinroTestReportRequest, JinroResponse
 router = APIRouter(tags=["jinro"])
 
 
-
 # 한 유저에 대한 모든 결과값을 조회
-
-# 이때, 스키마? json? -> 스키마 ㄱㄱ
 @router.get("/user")
 async def get_jinro_by_user(db:SessionDep, current_user:CurrentUser):
     return JinroService().find_by_user_id(db, current_user.id)
