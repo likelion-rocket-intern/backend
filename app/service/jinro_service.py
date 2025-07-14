@@ -1,11 +1,21 @@
 #이쪽은 repository
 
 
+from sys import version
 from sqlmodel import Session, null
+from app.crud import jinro
 from app.crud.jinro import crud_jinro
+from app.crud.jinro_result import crud_jinro_result
 from app.models.jinro import Jinro
 import json
 from app.core.redis import get_redis_client
+from typing import Optional
+from app.models.jinro_result import JinroResult
+from app.models.job_profile import JobProfile
+from typing import List, Dict
+from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
+from sqlmodel import select
 
 
 class JinroService:
@@ -40,22 +50,13 @@ class JinroService:
         
         return redis_key
 
-    # 시험 결과와 시험 문제를 전체 저장
-                # 이놈 같은 경우에는 테스트의 문항, 문제와 답변 이 2가지가 동시에 들어가야 한다
-            # 그리고 문항 같은 경우에는 저장할때 json파일로 저장하든, redis에 저장하든 알아서 하면 됨
-            #   그렇다면 문제 불러오기에서 어떻게든 그 문항을 저장하고
-            #   결과 조회할때 나오는 api객체 안의 값을 따로 빼와서 기존 저장했던 test의 뒷편에다가 저장하면 되겠네
-            #   그럼 여려명일 경우에는??
-            #       그럼 그 앞에 userId를 넣어두자
-            #       그리고 테스트 요청할떄 윗줄까지 해서 저장을 시킴
-            #       만약 이미 그 유저 파일이 있다면 삭제하고 다시 넣음 됨
-            #       혹은 그냥 여기서 그 유저 파일을 찾아서 지우면 됨
-            #       혹시몰라 테스트 봤다가 나왔다가 다시 테스트 보러 들어갈지도
-            #       그럼 그냥 합쳐서 요청하는 부분에서 만약 유저 아이디의 부분이 있다면 지우면 되겠네
-            #       대충 파일명을 "userId_테스트"
-            #    근데 생각해보면 유저가 여려명인 경우 로컬에 저장하면 우수수수 쏟아질텐데?
-            #    그럼 redis에 저장하자
-    def add_test_result(self, db: Session, current_user_id: int, test_result: dict):
+    
+# 여기를 다시 만들어봅시다
+# 일단 테스트를 찾고, 없으면 만들고
+# 있다면 그 테스트 id를 빌려와서 결과를 저장시키기
+
+    # 새로운 테스트가 떴으면 추가 하기
+    def add_new_test(self, db:Session, current_user_id: int, test_result:dict, version: str):
         # Redis에서 저장된 데이터 가져오기
         redis_client = get_redis_client()
         redis_key = f"jinro_test_{current_user_id}"
@@ -69,20 +70,138 @@ class JinroService:
             stored_test = temp_data.get("test")  # Redis에 저장된 test를 가져온다
         else:
             stored_test = None #여기에 예외처리를 해야 하는데
-        
-        jinro_count = len(crud_jinro.get_by_userid(db, current_user_id))
-        version = f"v_{jinro_count + 1}.0"
 
         # 결과를 저장
         new_jinro = Jinro(
             user_id = current_user_id,
             version=version,
+            # 이 결과는 따로 빼놨으니 상관 없을지도
             test_result = test_result,
             test= stored_test,
         )
         new_jinro = crud_jinro.create(db, jinro=new_jinro)
+
         
         # Redis에서 임시 데이터 삭제 (테스트 완료 후 정리)
         if redis_data:
             redis_client.delete(redis_key)
         
+        return new_jinro
+    
+    # 테스트 결과 추가하기
+
+    def add_test_result(self, db: Session, current_user_id: int, test_result: dict):
+        # 헤당 유저가 테스트를 치뤘다면 거기에 넣고 없다면 새로 jinro를 만들기
+        # 신규 유저가 테스트를 할 경우 없으니까 만들어야지
+        # 그럼 만약에 테스트 자체가 새로 바뀔 경우에는? -> 그리 되면 이후의 값들도 싹다 갈아 엎어야 해서 상관없을듯
+        
+        # 없으면 추가
+        jinro_count = len(crud_jinro.get_by_userid(db, current_user_id))
+        if jinro_count == 0:
+            jinro = self.add_new_test(db, current_user_id, test_result, f"v_{jinro_count + 1}.0")
+        # 있으면 채신 버전에서 가져오기
+        else:
+            jinro = crud_jinro.get_latest_by_user_id(db, current_user_id)
+            if jinro is None:
+             raise ValueError("해당 user_id에 대한 Jinro가 존재하지 않습니다.")
+        
+        # 이후 테스트 결과에서 원하는 값만 추출하고 넣는 부분을 진행
+        scores = {f"w{i}": test_result.get(f"w{i}") for i in range(1, 9)}
+        # 스코어를 float로 변환
+        user_score = [float(i) if i is not None else 0.0 for i in scores.values()]
+
+        result = self.calculate_similarity(user_score, db)
+
+        # result = 함수호출(user_score) #-> list로 반환, 여기만 함수 호출 바꾸면 됨
+
+        # 거기서 상위3종으로 
+        top3 = result[:3]
+
+        
+        # 버전도 채신 버전에서 가져오기
+        version_count = len(crud_jinro_result.get_by_jinro_id(db, jinro.id)) + 1
+
+
+        jinro_result = JinroResult( # 해당 진로검사 id
+            jinro_id=jinro.id,
+            version=version_count,  # 필요시 version 값
+            stability_score=scores["w1"] or -1,
+            creativity_score=scores["w2"] or -1,
+            social_service_score=scores["w3"] or -1,
+            ability_development_score=scores["w4"] or -1,
+            conservatism_score=scores["w5"] or -1,
+            social_recognition_score=scores["w6"] or -1,
+            autonomy_score=scores["w7"] or -1,
+            self_improvement_score=scores["w8"] or -1,
+            first_job_id=top3[0]["id"],
+            first_job_score=top3[0]["percentage"],
+            second_job_id=top3[1]["id"],
+            second_job_score=top3[1]["percentage"],
+            third_job_id=top3[2]["id"],
+            third_job_score=top3[2]["percentage"]
+        )
+        
+        # 이제 저걸 저장
+        jinro_result = crud_jinro_result.create(db, jinro_result=jinro_result)
+
+        return jinro_result.id
+    
+    # id 가지고 조회
+    def find_by_id(self, db: Session, id: int) -> Optional[Jinro]:
+        return crud_jinro.get_by_id(db, id)
+    
+    # 유저 아이디 가지고 결과 조회
+    def find_by_user_id(self, db: Session, user_id: int)-> List[JinroResult]:
+        # TODO 근데 이전 버전 테스트는 우짜지
+        jinro = crud_jinro.get_latest_by_user_id(db, user_id)
+        if jinro is None:
+            return [] 
+        return crud_jinro_result.get_by_jinro_id(db, jinro.id)
+        # 여기서 스키마로 딱 바꾸면 좋은데
+    
+
+    # 유저 아이디 가지고 채신 결과 조회
+    def find_by_user_id_latest(self, db: Session, user_id: int) -> Optional[JinroResult]:
+        jinro = crud_jinro.get_latest_by_user_id(db, user_id)
+        if jinro is None:
+            return None
+        return crud_jinro_result.get_latest_by_jinro_id(db, jinro.id)
+
+
+
+    
+    def calculate_similarity(self, user: List[float], session: Session) -> List[Dict]:
+        # DB에서 활성화된 직군 프로필 조회
+        job_profiles = session.exec(select(JobProfile).where(JobProfile.is_active == True)).all()
+        
+        if not job_profiles:
+            return []
+        
+        # 사용자 벡터 (2D 배열로 변환)
+        user_vector = np.array(user).reshape(1, -1)
+        
+        # 직군 프로필 벡터들 추출 (JobProfile 모델의 get_vector() 메서드 사용)
+        job_vectors = np.array([profile.get_vector() for profile in job_profiles])
+        
+        # 코사인 유사도 계산
+        similarities = cosine_similarity(user_vector, job_vectors).flatten()
+        
+        # 결과 생성
+        results = []
+        for i, (profile, similarity) in enumerate(zip(job_profiles, similarities)):
+            result = {
+                "id": profile.id,
+                "job_type": profile.job_type,
+                "job_name_ko": profile.job_name_ko,
+                "similarity": similarity,
+                "percentage": round(similarity * 100, 2),
+                "rank": 0  # 정렬 후 설정
+            }
+            results.append(result)
+        
+        # 유사도 높은 순으로 정렬 및 순위 설정
+        results.sort(key=lambda x: x["similarity"], reverse=True)
+        for i, result in enumerate(results):
+            result["rank"] = i + 1
+        
+        return results

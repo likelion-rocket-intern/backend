@@ -4,6 +4,9 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app/
 
+# Create datas directory
+RUN mkdir -p /app/datas
+
 # Install supervisor
 RUN apt-get update && apt-get install -y supervisor
 

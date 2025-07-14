@@ -1,7 +1,9 @@
 from sqlmodel import SQLModel, Field, Relationship
 from datetime import datetime
 from sqlalchemy.sql import func
+from sqlalchemy import Column
 from typing import Optional, List, TYPE_CHECKING
+from sqlalchemy.dialects.postgresql import JSONB
 
 if TYPE_CHECKING:
     from .resume_embedding import ResumeEmbedding
@@ -16,7 +18,7 @@ class Resume(SQLModel, table=True):
   file_url: str
   upload_filename: str
   original_filename: str
-  analysis_result: str
+  analysis_result: dict | None = Field(default=None, sa_column=Column(JSONB))
   created_at: datetime = Field(
       default_factory=func.now,
       sa_column_kwargs={"server_default": func.now()}

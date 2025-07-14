@@ -1,0 +1,122 @@
+{
+  "backend_developer": {
+    "stability": 5.0,
+    "creativity": 3.5,
+    "social_service": 2.5,
+    "ability_development": 5.0,
+    "conservatism": 4.5,
+    "social_recognition": 4.0,
+    "autonomy": 4.0,
+    "self_improvement": 4.5
+  },
+  "frontend_developer": {
+    "stability": 3.5,
+    "creativity": 5.5,
+    "social_service": 2.5,
+    "ability_development": 5.0,
+    "conservatism": 4.0,
+    "social_recognition": 4.0,
+    "autonomy": 5.5,
+    "self_improvement": 5.0
+  },
+  "ai_developer": {
+    "stability": 3.5,
+    "creativity": 4.5,
+    "social_service": 3.0,
+    "ability_development": 5.5,
+    "conservatism": 5.5,
+    "social_recognition": 5.5,
+    "autonomy": 4.0,
+    "self_improvement": 6.0
+  },
+  "marketer": {
+    "stability": 3.0,
+    "creativity": 5.0,
+    "social_service": 3.5,
+    "ability_development": 4.5,
+    "conservatism": 3.5,
+    "social_recognition": 4.0,
+    "autonomy": 4.5,
+    "self_improvement": 4.5
+  },
+  "business_development_manager": {
+    "stability": 3.5,
+    "creativity": 4.5,
+    "social_service": 3.0,
+    "ability_development": 5.0,
+    "conservatism": 4.5,
+    "social_recognition": 4.5,
+    "autonomy": 5.0,
+    "self_improvement": 4.5
+  },
+  "game_developer": {
+    "stability": 3.0,
+    "creativity": 6.0,
+    "social_service": 2.0,
+    "ability_development": 5.0,
+    "conservatism": 4.0,
+    "social_recognition": 4.5,
+    "autonomy": 4.5,
+    "self_improvement": 5.0
+  },
+  "ui_ux_designer": {
+    "stability": 3.0,
+    "creativity": 6.0,
+    "social_service": 3.5,
+    "ability_development": 4.5,
+    "conservatism": 3.5,
+    "social_recognition": 4.0,
+    "autonomy": 5.5,
+    "self_improvement": 4.5
+  },
+  "embedded_developer": {
+    "stability": 4.5,
+    "creativity": 3.5,
+    "social_service": 2.5,
+    "ability_development": 5.0,
+    "conservatism": 4.0,
+    "social_recognition": 4.0,
+    "autonomy": 3.5,
+    "self_improvement": 4.5
+  },
+  "cloud_engineer": {
+    "stability": 5.0,
+    "creativity": 3.5,
+    "social_service": 2.5,
+    "ability_development": 5.0,
+    "conservatism": 5.0,
+    "social_recognition": 4.5,
+    "autonomy": 4.0,
+    "self_improvement": 5.0
+  },
+  "devops_infrastructure": {
+    "stability": 5.5,
+    "creativity": 3.0,
+    "social_service": 2.5,
+    "ability_development": 5.0,
+    "conservatism": 5.0,
+    "social_recognition": 4.0,
+    "autonomy": 3.5,
+    "self_improvement": 4.5
+  },
+  "data_engineer": {
+    "stability": 4.5,
+    "creativity": 3.5,
+    "social_service": 3.0,
+    "ability_development": 5.0,
+    "conservatism": 4.5,
+    "social_recognition": 4.5,
+    "autonomy": 4.0,
+    "self_improvement": 5.0
+  },
+  "app_developer": {
+    "stability": 4.0,
+    "creativity": 5.0,
+    "social_service": 2.5,
+    "ability_development": 5.0,
+    "conservatism": 4.0,
+    "social_recognition": 4.0,
+    "autonomy": 4.5,
+    "self_improvement": 4.5
+  }
+}

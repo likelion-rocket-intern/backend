@@ -34,10 +34,13 @@ source .venv/bin/activate
 uv pip install -e . 
 
 # 4-1. DB 버전업
-alembic revision --autogenerate -m "create users table"
+alembic revision --autogenerate -m "create init_table"
 
 # 4-2. DB 마이그레이션 
 alembic upgrade head
+
+# 5-0. 사전 실행 
+./scripts/prestart.sh
 
 # 5. 서버실행
 uvicorn app.main:app --reload
