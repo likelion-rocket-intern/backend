@@ -17,6 +17,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 from sqlmodel import select
 
+from app.schemas.jinro import JinroResultResponse
+
 
 class JinroService:
     #db: Session 이놈은 인스턴스 메서드라서 지 자신인 self를 정의해야 한다
@@ -47,7 +49,6 @@ class JinroService:
             3600,  # 1시간 후 만료
             json.dumps(temp_data, ensure_ascii=False)
         )
-        
         return redis_key
 
     
@@ -110,6 +111,7 @@ class JinroService:
         # 스코어를 float로 변환
         user_score = [float(i) if i is not None else 0.0 for i in scores.values()]
 
+        # 분석 결과가 나옴
         result = self.calculate_similarity(user_score, db)
 
         # result = 함수호출(user_score) #-> list로 반환, 여기만 함수 호출 바꾸면 됨
@@ -151,24 +153,29 @@ class JinroService:
         return crud_jinro.get_by_id(db, id)
     
     # 유저 아이디 가지고 결과 조회
-    def find_by_user_id(self, db: Session, user_id: int)-> List[JinroResult]:
+    def find_by_user_id(self, db: Session, user_id: int)-> List[JinroResultResponse]:
         # TODO 근데 이전 버전 테스트는 우짜지
         jinro = crud_jinro.get_latest_by_user_id(db, user_id)
         if jinro is None:
             return [] 
-        return crud_jinro_result.get_by_jinro_id(db, jinro.id)
+        orm_list = crud_jinro_result.get_by_jinro_id(db, jinro.id)
+        return [JinroResultResponse.model_validate(obj) for obj in orm_list]
+        # tmp = crud_jinro_result.get_by_jinro_id(db, jinro.id)
+        # result
+        # for tmp_datp in tmp
         # 여기서 스키마로 딱 바꾸면 좋은데
     
 
     # 유저 아이디 가지고 채신 결과 조회
-    def find_by_user_id_latest(self, db: Session, user_id: int) -> Optional[JinroResult]:
+    def find_by_user_id_latest(self, db: Session, user_id: int) -> Optional[JinroResultResponse]:
         jinro = crud_jinro.get_latest_by_user_id(db, user_id)
         if jinro is None:
             return None
-        return crud_jinro_result.get_latest_by_jinro_id(db, jinro.id)
-
-
-
+        tmp = crud_jinro_result.get_latest_by_jinro_id(db, jinro.id)
+        if tmp is None:
+            return None
+        result = JinroResultResponse.model_validate(tmp)
+        return result
     
     def calculate_similarity(self, user: List[float], session: Session) -> List[Dict]:
         # DB에서 활성화된 직군 프로필 조회
