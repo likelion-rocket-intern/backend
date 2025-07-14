@@ -49,11 +49,19 @@ class ResumeService:
     def get_by_id(
         self,
         db: Session,
-        resume_id: int
+        resume_id: int,
+        user_id: int
     ) -> Optional[Resume]:
         resume = resume_crud.get_by_id(db=db, resume_id=resume_id)
+        if resume.user_id != user_id:
+            raise HTTPException(
+                status_code=403,
+                detail="해당 이력서는 접근 권한이 없습니다."
+            )
         if not resume:
-            raise HTTPException(status_code=404, detail="Resume not found")
+            raise HTTPException(
+                status_code=404, 
+                detail="Resume not found")
         return resume
 
     def get_by_user_id(

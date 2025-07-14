@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 import httpx
 from fastapi import status
 from pydantic import BaseModel, Field
@@ -128,12 +128,12 @@ async def post_test_report_v1(
         }
 
 @router.get("/{id}", response_model=JinroResponse)
-async def get_jinro(id: int, db:SessionDep):
-    result = JinroService().find_by_id(db,id)
+async def get_jinro(id: int, current_user:CurrentUser, db:SessionDep):
+    result = JinroService().find_by_id(db,id,current_user.id)
     if result:
         return result
     else:
-        return {
-            "error": "해당 id의 결과가 없습니다.",
-            "status_code": 404
-        }
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="해당 id의 결과가 없습니다."
+        )
