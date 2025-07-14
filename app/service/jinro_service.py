@@ -17,7 +17,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 from sqlmodel import select
 
-from app.schemas.jinro import JinroResultResponse
+from app.schemas.jinro import JinroResponse, JinroResultResponse
 
 
 class JinroService:
@@ -113,6 +113,7 @@ class JinroService:
 
         # 분석 결과가 나옴
         result = self.calculate_similarity(user_score, db)
+      
 
         # result = 함수호출(user_score) #-> list로 반환, 여기만 함수 호출 바꾸면 됨
 
@@ -149,14 +150,14 @@ class JinroService:
         return jinro.id
     
     # id 가지고 조회
-    def find_by_id(self, db: Session, id: int, user_id: int) -> Optional[Jinro]:
+    def find_by_id(self, db: Session, id: int, user_id: int) -> Optional[JinroResponse]:
         result = crud_jinro.get_by_id(db, id)
         if result.user_id != user_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="해당 결과는 접근 권한이 없습니다."
             )
-        return result
+        return JinroResponse.model_validate(result)
     
     # 유저 아이디 가지고 결과 조회
     def find_by_user_id(self, db: Session, user_id: int)-> List[JinroResultResponse]:
@@ -166,10 +167,6 @@ class JinroService:
             return [] 
         orm_list = crud_jinro_result.get_by_jinro_id(db, jinro.id)
         return [JinroResultResponse.model_validate(obj) for obj in orm_list]
-        # tmp = crud_jinro_result.get_by_jinro_id(db, jinro.id)
-        # result
-        # for tmp_datp in tmp
-        # 여기서 스키마로 딱 바꾸면 좋은데
     
 
     # 유저 아이디 가지고 채신 결과 조회
@@ -178,18 +175,14 @@ class JinroService:
         if jinro is None:
             return None
         tmp = crud_jinro_result.get_latest_by_jinro_id(db, jinro.id)
-        if tmp is None:
-            return None
-        result = JinroResultResponse.model_validate(tmp)
-        return result
+        return JinroResultResponse.model_validate(tmp)
+
     
     def calculate_similarity(self, user: List[float], session: Session) -> List[Dict]:
         # DB에서 활성화된 직군 프로필 조회
         job_profiles = session.exec(select(JobProfile).where(JobProfile.is_active == True)).all()
-        
         if not job_profiles:
             return []
-        
         # 사용자 벡터 (2D 배열로 변환)
         user_vector = np.array(user).reshape(1, -1)
         
@@ -198,7 +191,7 @@ class JinroService:
         
         # 코사인 유사도 계산
         similarities = cosine_similarity(user_vector, job_vectors).flatten()
-        
+
         # 결과 생성
         results = []
         for i, (profile, similarity) in enumerate(zip(job_profiles, similarities)):
