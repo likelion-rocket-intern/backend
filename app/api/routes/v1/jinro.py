@@ -127,8 +127,8 @@ async def post_test_report_v1(
         }
 
 @router.get("/{id}", response_model=JinroResponse)
-async def get_jinro(id: int, db:SessionDep):
-    result = JinroService().find_by_id(db,id)
+async def get_jinro(id: int, current_user:CurrentUser, db:SessionDep):
+    result = JinroService().find_by_id(db,id,current_user.id)
     if result:
         return result
     else:
