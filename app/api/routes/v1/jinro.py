@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 import httpx
 from fastapi import status
 from pydantic import BaseModel, Field
@@ -132,7 +132,7 @@ async def get_jinro(id: int, db:SessionDep):
     if result:
         return result
     else:
-        return {
-            "error": "해당 id의 결과가 없습니다.",
-            "status_code": 404
-        }
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="해당 id의 결과가 없습니다."
+        )
