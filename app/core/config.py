@@ -99,6 +99,7 @@ class Settings(BaseSettings):
     # OpenAI Settings
     OPENAI_API_KEY: str = ""
     OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
+    OPENAI_MODEL: str = "gpt-4o"
 
     # 진로 API KEY
     JINRO_API_KEY: str = ""
