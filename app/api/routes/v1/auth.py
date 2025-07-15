@@ -29,10 +29,10 @@ async def kakao_callback(
         response.set_cookie(
             key="access_token",
             value=token.access_token,
-            #httponly=True,
-            #secure=settings.USE_HTTPS,  # 환경에 따라 설정
+            httponly=True,
+            secure=settings.USE_HTTPS,  # 환경에 따라 설정
             samesite="lax",
-            #domain=settings.COOKIE_DOMAIN,  # 쿠키 도메인 설정
+            domain=settings.COOKIE_DOMAIN,  # 쿠키 도메인 설정
             max_age= 30 * 60  # 30분
         )
         
@@ -40,10 +40,10 @@ async def kakao_callback(
         response.set_cookie(
             key="refresh_token",
             value=token.refresh_token,
-            #httponly=True,
-            #secure=settings.USE_HTTPS,  # 환경에 따라 설정
+            httponly=True,
+            secure=settings.USE_HTTPS,  # 환경에 따라 설정
             samesite="lax",
-            #domain=settings.COOKIE_DOMAIN,  # 쿠키 도메인 설정
+            domain=settings.COOKIE_DOMAIN,  # 쿠키 도메인 설정
             max_age=7 * 24 * 60 * 60  # 7일
         )
         
