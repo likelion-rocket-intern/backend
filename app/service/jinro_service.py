@@ -149,7 +149,7 @@ class JinroService:
 
         return jinro.id
     
-    # id 가지고 조회
+    # 진로 id 가지고 조회
     def find_by_id(self, db: Session, id: int, user_id: int) -> Optional[JinroResponse]:
         result = crud_jinro.get_by_id(db, id)
         if result.user_id != user_id:
@@ -176,6 +176,7 @@ class JinroService:
             return None
         tmp = crud_jinro_result.get_latest_by_jinro_id(db, jinro.id)
         return JinroResultResponse.model_validate(tmp)
+    
 
     
     def calculate_similarity(self, user: List[float], session: Session) -> List[Dict]:
