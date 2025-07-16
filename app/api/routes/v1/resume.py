@@ -97,7 +97,7 @@ async def get_resume(
     session: SessionDep,
 ) -> ResumeDetailResponse:
     try:
-        resume = resume_service.get_by_id(session, resume_id)
+        resume = resume_service.get_by_id(session, resume_id, current_user.id)
         return ResumeDetailResponse(
             id=resume.id,
             user_id=resume.user_id,
