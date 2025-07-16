@@ -5,8 +5,7 @@ from app.core.redis import get_redis_client
 from app.schemas.status import TaskResumeStatus
 from app.core.db import engine
 from sqlmodel import Session
-from app.models.resume import Resume
-from app.models.resume_embedding import ResumeEmbedding
+from app.models.resume import Resume, ResumeEmbedding, ResumeKeyword
 from app.service.resume_service import resume_service
 from app.crud import resume_crud
 from app.utils.storage import download_resume, delete_resume
@@ -69,7 +68,7 @@ def send_resume_analysis(
                     raise Exception("Failed to download file from storage")
 
                 # 2. 파일 파싱 & 청킹
-                chunks = resume_service.parse_and_chunk_resume(temp_file_path, upload_filename, original_filename)
+                chunks, similar_words_list = resume_service.parse_and_chunk_resume(temp_file_path, upload_filename, original_filename)
                 update_task_status(task_id, TaskResumeStatus.PARSING, {"message": "파일 파싱 중입니다."})
                 
                 # 3. 청크 임베딩
@@ -84,6 +83,17 @@ def send_resume_analysis(
                         embedding=vector
                     )
                     for idx, (chunk, vector) in enumerate(zip(chunks, vectors))
+                ]
+
+                # similar_words_list를 ResumeKeyword로 변환하여 저장
+                new_resume.resume_keywords = [
+                    ResumeKeyword(
+                        keyword=similar_word["word"],
+                        similar_to=similar_word["similar_to"],
+                        similarity=similar_word["similarity"],
+                        frequency=similar_word["frequency"]
+                    )
+                    for similar_word in similar_words_list
                 ]
                 
                 # 5. 한 트랜잭션으로 저장

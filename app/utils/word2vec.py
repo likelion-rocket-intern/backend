@@ -1,4 +1,5 @@
 from gensim.models import KeyedVectors
+import json
 import os
 import sys
 import threading
@@ -8,6 +9,7 @@ class WordVectorModelLoader:
 
     _instance = None # 싱글톤 인스턴스를 저장할 변수
     _model = None    # Word2Vec 모델을 저장할 변수
+    _json_keywords_list = None
     _lock = threading.Lock() # 멀티쓰레드 환경에서 안전하게 로드하기 위한 락
 
     def __new__(cls):
@@ -49,6 +51,11 @@ class WordVectorModelLoader:
         except Exception as e:
             print(f"[ModelLoader] 모델 로드 중 예상치 못한 오류 발생: {e}")
             WordVectorModelLoader._model = None
+    
+    def load_json_keywords_list(self):
+        json_file_path = f'{WordVectorModelLoader.DATA_DIR}/keywords.json'
+        with open(json_file_path, 'r', encoding='utf-8') as f:
+            WordVectorModelLoader._json_keywords_list = json.load(f)
 
     def get_model(self):
         # 로드된 모델 인스턴스를 반환
@@ -56,3 +63,8 @@ class WordVectorModelLoader:
             # 이 경우는 보통 로드 실패했거나, 초기화가 제대로 안 됐을 때 발생
             print("[ModelLoader] 경고: 모델이 로드되지 않았습니다. get_model 전에 load_model이 호출되었는지 확인하세요.")
         return WordVectorModelLoader._model
+    
+    def get_json_keywords_list(self):
+        if WordVectorModelLoader._json_keywords_list is None:
+            self.load_json_keywords_list()
+        return WordVectorModelLoader._json_keywords_list

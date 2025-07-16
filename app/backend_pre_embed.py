@@ -80,18 +80,21 @@ def init_job_profiles():
             with open(profile_file_path, 'r', encoding='utf-8') as f:
                 profiles_data = json.load(f)
             
-            # 기존 데이터가 있는지 확인
-            existing_profiles = session.exec(select(JobProfile)).all()
-            if existing_profiles:
-                logger.info(f"기존 직군 프로필 {len(existing_profiles)}개를 삭제합니다.")
-                for profile in existing_profiles:
-                    session.delete(profile)
-                session.commit()
-                logger.info("기존 직군 프로필 삭제 완료.")
+            # 기존 직군 타입들을 가져옴
+            existing_job_types = {
+                profile.job_type 
+                for profile in session.exec(select(JobProfile))
+            }
             
-            # 각 직군 프로필을 DB에 저장
+            # 각 직군 프로필을 DB에 저장 (없는 것만)
             created_count = 0
+            skipped_count = 0
             for job_type, profile_data in profiles_data.items():
+                # 이미 존재하는 job_type이면 건너뜀
+                if job_type in existing_job_types:
+                    skipped_count += 1
+                    continue
+                
                 job_profile = JobProfile(
                     job_type=job_type,
                     job_name_ko=job_name_mapping.get(job_type, job_type),
@@ -110,8 +113,11 @@ def init_job_profiles():
                 created_count += 1
                 logger.info(f"직군 프로필 추가: {job_type} ({job_name_mapping.get(job_type, job_type)})")
             
-            session.commit()
-            logger.info(f"직군 프로필 초기화 완료. 총 {created_count}개 직군이 추가되었습니다.")
+            if created_count > 0:
+                session.commit()
+                logger.info(f"직군 프로필 초기화 완료. {created_count}개 추가, {skipped_count}개 건너뜀")
+            else:
+                logger.info(f"추가할 새 직군 프로필이 없습니다. (기존 프로필: {skipped_count}개)")
             
         except FileNotFoundError:
             logger.error(f"프로필 파일 '{profile_file_path}'를 찾을 수 없습니다.")

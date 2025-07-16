@@ -21,9 +21,7 @@ async def kakao_callback(
     """카카오 로그인 콜백 처리"""
     try:
         token, user = await auth_service.process_social_login(session, code)
-  
-        # 로컬에서 테스트시 httponlym secure, domain을 지워볼것
-
+        
         # access 토큰을 쿠키에 설정
         response = RedirectResponse(url=f"{settings.FRONTEND_HOST}")
         response.set_cookie(
@@ -33,13 +31,13 @@ async def kakao_callback(
             secure=settings.USE_HTTPS,  # 환경에 따라 설정
             samesite="lax",
             domain=settings.COOKIE_DOMAIN,  # 쿠키 도메인 설정
-            max_age= 30 * 60  # 30분
+            max_age=30 * 60  # 30분
         )
         
         # refresh 토큰을 쿠키에 설정
         response.set_cookie(
             key="refresh_token",
-            value=token.refresh_token,
+            value=token.refresh_token, 
             httponly=True,
             secure=settings.USE_HTTPS,  # 환경에 따라 설정
             samesite="lax",

@@ -89,6 +89,7 @@ jobs:
             curl -o /dockerProjects/resume_matching/datas/job_data.csv https://raw.githubusercontent.com/${{ github.repository }}/main/datas/job_data.csv
             curl -o /dockerProjects/resume_matching/datas/resume_data.csv https://raw.githubusercontent.com/${{ github.repository }}/main/datas/resume_data.csv
             curl -o /dockerProjects/resume_matching/datas/jinro_data.json https://raw.githubusercontent.com/${{ github.repository }}/main/datas/jinro_data.json
+            curl -o /dockerProjects/resume_matching/datas/jinro_data.json https://raw.githubusercontent.com/${{ github.repository }}/main/datas/keywords.json
             
             chmod +x /dockerProjects/resume_matching/backend/zero_downtime_deploy.py
             python3 /dockerProjects/resume_matching/backend/zero_downtime_deploy.py 

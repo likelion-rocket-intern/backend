@@ -1,10 +1,9 @@
 from sqlmodel import SQLModel
-from app.models.jinro_result import JinroResult
 from app.models.user import User
-from app.models.resume import Resume
-from app.models.resume_embedding import ResumeEmbedding
+from app.models.resume import Resume, ResumeEmbedding, ResumeKeyword
 from app.models.embedding import Embedding
-from app.models.jinro import Jinro
 from app.models.job_profile import JobProfile
+from app.models.jinro import Jinro
+from app.models.jinro_result import JinroResult
 
-__all__ = ["User", "Resume", "ResumeEmbedding", "Embedding", "SQLModel", "Jinro", "JinroResult", "JobProfile"]
+__all__ = ["User", "Resume", "ResumeEmbedding", "ResumeKeyword", "Embedding", "SQLModel", "Jinro", "JinroResult", "JobProfile"]
