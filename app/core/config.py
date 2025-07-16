@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     FRONTEND_HOST: str = os.getenv("FRONTEND_HOST", "http://localhost:3000")
     #https://api.ai-resume.kknaks.site
-    BACKEND_HOST: str = os.getenv("BACKEND_HOST", "http://localhost:8000")
+    BACKEND_HOST: str = os.getenv("BACKEND_HOST", "https://api.ai-resume.kknaks.site")
     USE_HTTPS: bool = os.getenv("USE_HTTPS", "false").lower() == "true"
     COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "kknaks.site")
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
