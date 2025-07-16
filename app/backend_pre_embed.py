@@ -98,6 +98,7 @@ def init_job_profiles():
                 job_profile = JobProfile(
                     job_type=job_type,
                     job_name_ko=job_name_mapping.get(job_type, job_type),
+                    description=profile_data["definition"],
                     stability=profile_data["stability"],
                     creativity=profile_data["creativity"],
                     social_service=profile_data["social_service"],
