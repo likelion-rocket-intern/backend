@@ -105,7 +105,7 @@ def upgrade():
     sa.Column('social_recognition_score', sa.Integer(), nullable=False),
     sa.Column('autonomy_score', sa.Integer(), nullable=False),
     sa.Column('self_improvement_score', sa.Integer(), nullable=False),
-    sa.Column('first_job_id', sa.Integer(), nullable=False),
+    sa.Column('first_job_id', sa.Integer(), nullable=True),
     sa.Column('first_job_score', sa.Float(), nullable=False),
     sa.Column('second_job_id', sa.Integer(), nullable=False),
     sa.Column('second_job_score', sa.Float(), nullable=False),
