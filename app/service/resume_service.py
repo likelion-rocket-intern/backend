@@ -38,6 +38,11 @@ class ResumeService:
             api_key=settings.OPENAI_API_KEY,
             dimensions=1024
         )
+        
+        # WordVectorModelLoader 인스턴스를 한 번만 생성
+        self.word_vector_loader = WordVectorModelLoader()
+        self.model = self.word_vector_loader.get_model()
+        self.json_keywords_list = self.word_vector_loader.get_json_keywords_list()
 
     def create(
         self,
@@ -313,9 +318,6 @@ class ResumeService:
             }
 
     def analysis_keywords(self, documents: Document):
-
-        json_keywords_list = WordVectorModelLoader().get_json_keywords_list()
-        model = WordVectorModelLoader().get_model()
         SIMILARITY_THRESHOLD = settings.SIMILARITY_THRESHOLD
 
         full_text = ""
@@ -333,9 +335,9 @@ class ResumeService:
 
         try:
             for resume_word, freq in resume_dict.items():
-                for criterion_keyword in json_keywords_list:
+                for criterion_keyword in self.json_keywords_list:
                     try:
-                        similarity = model.similarity(resume_word, criterion_keyword)
+                        similarity = self.model.similarity(resume_word, criterion_keyword)
                         if similarity >= SIMILARITY_THRESHOLD:
                             similar_words_list.append({
                                 'keyword': resume_word,
