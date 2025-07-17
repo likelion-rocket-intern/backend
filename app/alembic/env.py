@@ -5,7 +5,7 @@ from logging.config import fileConfig
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from pathlib import Path
-
+from pgvector.sqlalchemy import Vector
 
 # env.py 파일이 있는 디렉토리 (app/alembic/)
 # current_dir = Path(__file__).parent

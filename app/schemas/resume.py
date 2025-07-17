@@ -13,6 +13,13 @@ class TaskStatusResponse(BaseModel):
     status: str
     result: dict
 
+class Keyword(BaseModel):
+    keyword: str
+    similar_to: str
+    similarity: float
+    frequency: int
+    
+
 class ResumeDetailResponse(BaseModel):
     id: int
     user_id: int
@@ -21,6 +28,7 @@ class ResumeDetailResponse(BaseModel):
     upload_filename: str | None = None
     file_url: str | None = None
     file_path: str | None = None  # For backward compatibility
+    keywords: List[Keyword]
     analysis_result: str | dict
     created_at: datetime
 

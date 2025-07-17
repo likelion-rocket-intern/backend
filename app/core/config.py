@@ -130,6 +130,8 @@ class Settings(BaseSettings):
     NCP_SECRET_KEY: str
     NCP_BUCKET_NAME: str
     NCP_REGION: str
+
+    SIMILARITY_THRESHOLD: float = 0.5
     
     @computed_field
     @property

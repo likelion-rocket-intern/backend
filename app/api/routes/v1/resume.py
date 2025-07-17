@@ -11,6 +11,7 @@ import uuid
 from app.schemas.resume import AnalysisResponse, TaskStatusResponse, ResumeDetailResponse, ResumeListResponse
 from app.schemas.status import TaskStatus
 from app.utils import storage
+from app.schemas.resume import Keyword
 
 
 router = APIRouter(tags=["resume"])
@@ -97,7 +98,15 @@ async def get_resume(
     session: SessionDep,
 ) -> ResumeDetailResponse:
     try:
-        resume = resume_service.get_by_id(session, resume_id)
+        resume = resume_service.get_by_id(session, resume_id, current_user.id)
+        keywords = [
+            Keyword(
+                keyword=kw.keyword,
+                similar_to=kw.similar_to,
+                similarity=kw.similarity,
+                frequency=kw.frequency
+            ) for kw in resume.resume_keywords
+        ]
         return ResumeDetailResponse(
             id=resume.id,
             user_id=resume.user_id,
@@ -105,6 +114,7 @@ async def get_resume(
             original_filename=resume.original_filename,
             upload_filename=resume.upload_filename,
             file_url=resume.file_url,
+            keywords=keywords,
             analysis_result=resume.analysis_result,
             created_at=resume.created_at
         )
