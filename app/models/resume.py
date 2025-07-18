@@ -33,6 +33,7 @@ class Resume(SQLModel, table=True):
         back_populates="resume",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )
+    job_descriptions: List["JobDescription"] = Relationship(back_populates="resume")
 
 class ResumeKeyword(SQLModel, table=True):
     __tablename__ = "resume_keywords"

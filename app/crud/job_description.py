@@ -1,25 +1,21 @@
-from sqlmodel import Session, select
-from typing import Optional, List
+from sqlmodel import Session
 from app.models.job_description import JobDescription
+from app.schemas.job_description import JobDescriptionRequest
 
 class CRUDJobDescription:
-    def create(
-        self,
-        db: Session,
-        *,
-        job_description: JobDescription
-    ) -> JobDescription:
-        db.add(job_description)
-        db.commit()
-        db.refresh(job_description)
-        return job_description
+    def create_from_content(self, db: Session, *, content: str, resume_id: int) -> JobDescription:
+        """
+        데이터베이스에 새로운 채용 공고 내용을 저장합니다.
+        """
 
-    def get_by_id(self, db: Session, id: int) -> Optional[JobDescription]:
-        return db.get(JobDescription, id)
+        db_obj = JobDescription(
+            content=content,
+            resume_id=resume_id
+        )
+
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
     
-    # 특정 사용자가 업로드한 모든 JD를 가져오는 메서드 (예시)
-    def get_by_user_id(self, db: Session, user_id: int) -> List[JobDescription]:
-        query = select(JobDescription).where(JobDescription.user_id == user_id)
-        return list(db.exec(query).all())
-    
-crud_job_description = CRUDJobDescription()
+job_description_crud = CRUDJobDescription()
