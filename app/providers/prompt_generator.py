@@ -15,61 +15,68 @@ class AnalysisPromptGenerator(PromptGeneratorInterface):
         context = "\n---\n".join([chunk.page_content for chunk in resume_chunks])
 
         prompt_template = f"""
-You are a highly experienced senior tech recruiter and career consultant. Your task is to analyze the provided resume excerpts and determine the candidate's suitability for a specific job description.
+You are a top-tier IT headhunter and career consultant in South Korea. Your primary language is Korean. Your task is to conduct a detailed analysis comparing a candidate's resume against a job description.
 
-**1. Job Description:**
-```
+**1. 채용공고 (Job Description):**
 {job_description}
-```
 
-**2. Relevant Resume Excerpts:**
-```
+
+
+**2. 이력서 핵심 내용 (Relevant Resume Excerpts):**
 {context}
-```
 
 
-**3. Example of a GOOD Analysis (Few-shot Example):**
-Here is an example of the kind of high-quality, structured analysis I expect.
+**3. 좋은 분석의 예시 (Example of a GOOD Analysis):**
+This is the high-quality, structured JSON output I expect. All text values must be in Korean.
 ```json
 {{
-  "overall_assessment": {{
-    "score": 85,
-    "summary": "해당 이력서는 시니어 백엔드 엔지니어 직무에 매우 적합합니다. 마이크로서비스 아키텍처(MSA) 및 클라우드 플랫폼(AWS)과 같은 핵심 요구 사항에 대한 풍부한 경험을 보유하고 있으며, 구체적인 프로젝트 사례를 바탕으로 검증된 역량을 갖추고 있습니다."
+  "job_summary": {{
+    "name": "AI 백엔드 개발자",
+    "skill": [
+    "생성형 AI 플랫폼 활용 Application 설계 및 개발",
+    "정형 또는 비정형 데이터 수집 및 처리 파이프라인 설계 및 구현",
+    "Python, Golang을 이용한 서비스 구축 및 유지보수",
+    "MLOps 구축 및 운영을 통한 모델 서빙 및 배포 자동화"
+    ]
   }},
-  "strengths": [
-    {{"strength": "깊은 MSA 경험", "evidence": "단일 애플리케이션을 20개가 넘는 마이크로서비스로 전환하는 작업을 주도했으며, 해당 업무의 핵심 요구 사항과 직접적으로 일치했습니다."}},
-    {{"strength": "AWS 활용", "evidence": "'프로젝트 A' 설명에 언급된 대로 EC2, S3, RDS, Lambda를 포함한 광범위한 AWS 서비스를 활용했습니다."}}
+  "resume_strengths": [
+    {{
+      "keyword": "RAG 파이프라인 개발",
+      "evidence": "이력서의 'RAG 기반 AI 이력서 분석 시스템 개발' 프로젝트 경험이 채용공고의 우대사항 "RAG 기반 AI 시스템 설계 및 구현 경험을 보유하신 분"과 부합해요."
+    }},
+    {{
+      "keyword": "FastAPI 기반 서버 개발",
+      "evidence": "이력서에 명시된 'FastAPI를 이용한 고성능 API 서버 개발 및 MSA 환경 배포' 이 해당 직무에 관한 "백엔드 아키텍처 설계 및 운영 (On-Premise 및 Cloud 환경)"에 부합해보여요."
+    }}
   ],
+  "overall_assessment": {{
+    "score": 90,
+    "summary": "AI 백엔드 개발자 직무에 매우 적합해보여요! 특히 LLM과 RAG 파이프라인 구축한 경험이 핵심 자격요건과 일치하고, FastAPI 및 Docker 활용 능력 또한 실무에 즉시 기여할 수 있는 수준이라고 보여집니다."
+  }},
   "areas_for_improvement": [
-    {{"area": "적은 NoSQL 활용 경험", "reasoning": "현재 이력서에는 주로 PostgreSQL과 같은 RDBMS 관련 경험이 나열되어 있습니다. 직무 내용에 DynamoDB 관련 내용이 언급되어 있으므로, NoSQL 관련 경험이 있다면 강조하는 것이 좋습니다."}}
+    {{
+      "area": "특정 클라우드 서비스 경험",
+      "reasoning": "채용공고에 AWS ElasticBeanstalk이 언급되어 있으나, 이력서에는 포괄적인 AWS 경험만 기재되어 있어 해당 서비스 경험을 구체화하면 좋습니다."
+    }}
   ]
 }}
 ```
 
-**4. Your Task:**
-Based on the resume excerpts, provide a comprehensive analysis of the candidate's job fit. Follow these instructions precisely:
+**4. 평가 기준 (Scoring Rubric):**
+Use the following rubric to determine the job fit score. Be strict and objective.
+- **90-100 (매우 높음):** 모든 핵심 자격요건을 충족하며, 구체적이고 증명 가능한 경험을 다수 보유함.
+- **70-89 (높음):** 대부분의 핵심 자격요건을 충족하지만, 일부 경험이 부족하거나 간접적임.
+- **50-69 (보통):** 일부 핵심 자격요건을 충족하지만, 여러 부분에서 불일치가 발견됨.
+- **Below 50 (낮음):** 핵심 자격요건과 경험의 관련성이 매우 낮음.
 
-a. **Overall Assessment:** Start with a summary of your overall assessment, including a job fit score from 1 to 100.
-b. **Key Strengths:** Identify and list up to 3 key strengths of the candidate that are highly relevant to the job description. For each strength, provide a specific example or evidence from the resume.
-c. **Areas for Improvement:** Identify and list up to 2 areas where the candidate's experience or skills seem less aligned with the job description. Frame this as constructive feedback.
 
-**5. Output Format:**
-Provide your analysis in a structured JSON format, just like the example provided in section 3. Do not add any text or explanations outside of the JSON structure.
-Ensure your output is a single, valid JSON object.
+**5. 당신의 임무 (Your Task):**
+Based on the provided information, perform the following steps and generate a single, valid JSON object as your final output. **All responses MUST be in Korean.**
 
-{{
-  "overall_assessment": {{
-    "score": <integer, 1-100>,
-    "summary": "<string>"
-  }},
-  "strengths": [
-    {{"strength": "<string>", "evidence": "<string>"}},
-    ...
-  ],
-  "areas_for_improvement": [
-    {{"area": "<string>", "reasoning": "<string>"}},
-    ...
-  ]
-}}
+a. **Analyze Job Description:** First, carefully read the job description. Extract the official job title and a list of key required skills/technologies. Then, summarize the 2-4 most critical required competencies from the '주요업무' and '자격요건' sections.
+b. **Analyze Resume Strengths:** Compare the extracted required competencies with the candidate's resume excerpts. Identify up to 3 key strengths. For each strength, specify the `keyword` (the competency) and the `evidence` (a specific part of the resume that supports it).
+c. **Final Evaluation:** Provide an overall assessment, including a job fit score (1-100) and a summary. Also, identify up to 2 areas for improvement, offering constructive feedback.
+d. **Format as JSON:** Combine all the analysis into a single JSON object that strictly follows the structure provided in the example above. Do not add any text or explanations outside of the JSON structure.
+
 """
         return prompt_template
