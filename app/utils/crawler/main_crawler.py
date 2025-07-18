@@ -3,9 +3,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import time
 import re
-#from app.utils.crawler.module.jumpit_crawler import jumpit_extract
 from app.utils.crawler.module.jumpit_crawler import jumpit_extract
-from app.utils.crawler.module.saramin_extract import saramin_extract
 from app.utils.crawler.module.wanted_crawler import wanted_extract
 
 
@@ -23,10 +21,6 @@ class JobCrawler:
         
         if 'jumpit' in domain:
             return 'jumpit'
-        elif 'saramin' in domain:
-            return 'saramin'
-        elif 'jobkorea' in domain:
-            return 'jobkorea'
         elif 'wanted' in domain:
             return 'wanted'
         else:
@@ -76,10 +70,6 @@ class JobCrawler:
         
         if site_name == 'jumpit':
             return jumpit_extract(html, url)
-        elif site_name == 'saramin':
-            return saramin_extract(html, url)
-        # elif site_name == 'jobkorea':
-        #     return jobkorea_extract(html, url)
         elif site_name == 'wanted':
             return wanted_extract(html, url)
         else:
