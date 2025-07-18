@@ -12,9 +12,7 @@ from app.schemas.jinro import JinroTestReportRequest, JinroResponse
 router = APIRouter(tags=["jinro"])
 
 
-
 # 한 유저에 대한 모든 결과값을 조회
-# 이때, 스키마? json?
 @router.get("/user")
 async def get_jinro_by_user(db:SessionDep, current_user:CurrentUser):
     return JinroService().find_by_user_id(db, current_user.id)
@@ -107,7 +105,7 @@ async def post_test_report_v1(
                 }
             # 4. 결과 DB 저장
             result_id = JinroService().add_test_result(db, current_user.id, result_data)
-            # 5. 최종 결과 반환
+            # 5. 최종 결과 반환5
             return {
                 "success": True,
                 "result_id": result_id,

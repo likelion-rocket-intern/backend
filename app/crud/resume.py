@@ -1,6 +1,5 @@
 from sqlmodel import Session, select
-from app.models.resume import Resume
-from app.models.resume_embedding import ResumeEmbedding
+from app.models.resume import Resume, ResumeEmbedding
 from typing import Optional, List
 from fastapi import HTTPException
 from sqlalchemy.orm import selectinload

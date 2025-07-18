@@ -68,8 +68,8 @@ class JinroResponse(BaseModel):
     id: int
     user_id: int
     version: str
-    test: Optional[Dict[str, Any]] = None
-    test_result: Optional[Dict[str, Any]] = None
+   # test: Optional[Dict[str, Any]] = None
+   # test_result: Optional[Dict[str, Any]] = None
     created_at: datetime
     jinro_results: List[JinroResultResponse]
 
