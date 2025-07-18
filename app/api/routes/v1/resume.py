@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File, Form, Depends
 from fastapi.responses import Response
 from app.api.deps import SessionDep, CurrentUser
 from app.schemas.auth import KakaoLoginResponse, UserResponse
@@ -12,6 +12,11 @@ from app.schemas.resume import AnalysisResponse, TaskStatusResponse, ResumeDetai
 from app.schemas.status import TaskStatus
 from app.utils import storage
 from app.schemas.resume import Keyword
+
+#JobDescription
+from app.worker.job_analysis import send_job_analysis_task 
+from app.schemas.job_description import JobDescriptionRequest, JobTaskStatusResponse, JobAnalysisTaskResponse
+
 
 
 router = APIRouter(tags=["resume"])
@@ -159,3 +164,57 @@ async def delete_resume(
         raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to delete resume: {str(e)}")
+
+#JobDescription
+@router.post("/{resume_id}/analyze", response_model=JobAnalysisTaskResponse)
+async def request_job_analysis(
+    resume_id: int,
+    job_description_request: JobDescriptionRequest,
+    current_user: CurrentUser,
+) -> JobAnalysisTaskResponse:
+    """
+    주어진 이력서(resume_id)와 채용 공고를 RAG 기반으로 분석합니다.
+    """
+    task_id = str(uuid.uuid4())
+
+    try:
+        send_job_analysis_task.send(
+            task_id=task_id,
+            user_id=current_user.id,
+            resume_id=resume_id,
+            job_description=job_description_request.content
+        )
+
+        return JobAnalysisTaskResponse(task_id=task_id,  message="Job description analysis has been successfully requested. Please check the status using the task_id.")
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to analyze resume with job description: {str(e)}"
+        )
+    
+@router.get("/{resume_id}/task/{task_id}", response_model=JobTaskStatusResponse)
+async def check_job_task_status(
+    resume_id: int, 
+    task_id: str,
+    current_user: CurrentUser,
+    session: SessionDep
+):
+    """
+    특정 이력서에 속한 작업의 상태와 결과를 조회합니다.
+    """
+    # 이력서가 현재 사용자의 소유인지 확인
+    resume = resume_service.get_by_id(db=session, resume_id=resume_id, user_id=current_user.id)
+    if not resume:
+        raise HTTPException(status_code=404, detail="Resume not found or permission denied.")
+
+    # Redis에서 작업 상태를 가져옴
+    task_data = get_task_status(task_id)
+    if not task_data:
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    task_data['task_id'] = task_id
+
+    return JobTaskStatusResponse(**task_data)
