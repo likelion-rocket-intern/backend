@@ -1,20 +1,17 @@
 from pydantic import BaseModel
-from typing import List
+from typing import Dict, Any, Optional
 
-# --- 입력(Create) 스키마 ---
-# API를 통해 JD를 생성할 때 받을 데이터의 형식을 정의
-class JobDescriptionCreate(BaseModel):
-    name: str
+class JobDescriptionRequest(BaseModel):
     content: str
-    skills: List[str] = []
 
+class JobDescriptionResultResponse(BaseModel):
+    analysis_result: Dict[str, Any] 
 
-# --- 출력(Read) 스키마 ---
-# API가 클라이언트에게 JD 정보를 응답으로 보낼 때의 형식을 정의
-class JobDescriptionRead(BaseModel):
-    id: int
-    user_id: int
-    name: str
-    content: str
-    skills: List[str]
+class JobAnalysisTaskResponse(BaseModel):
+    task_id: str
+    message: str
 
+class JobTaskStatusResponse(BaseModel):
+    task_id: str
+    status: str
+    result: Optional[Dict[str, Any]] = None
