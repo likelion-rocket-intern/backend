@@ -4,6 +4,7 @@ from typing import Any, Optional
 from app.core.config import settings
 from app.interface.llm_provider import LLMProviderInterface
 from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ class OpenAIProvider(LLMProviderInterface):
     def __init__(
         self,
         model_name: str = settings.OPENAI_MODEL,
-        temperature: float = 0.3,
+        temperature: float = 0.1,
         api_key: Optional[str] = settings.OPENAI_API_KEY,
     ):
         """
@@ -31,10 +32,11 @@ class OpenAIProvider(LLMProviderInterface):
             raise ValueError("OpenAI API 키가 설정되지 않았습니다.")
 
         self.llm = ChatOpenAI(
-            model_name=model_name, temperature=temperature, api_key=api_key
+            model_name=model_name, temperature=temperature, api_key=api_key, max_tokens=4096, model_kwargs={"response_format": {"type": "json_object"}}
         )
         logger.info(f"OpenAI LLM Provider가 다음 모델로 초기화되었습니다: {model_name}")
 
     def invoke(self, prompt: str, **kwargs: Any) -> str:
-        response = self.llm.invoke(prompt, **kwargs)
+        messages = [HumanMessage(content=prompt)]
+        response = self.llm.invoke(messages, **kwargs)
         return response.content
