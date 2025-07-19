@@ -18,3 +18,4 @@ class JobDescription(SQLModel, table=True):
     
     resume: "Resume" = Relationship(back_populates="job_descriptions")
 
+result: Optional["JobDescriptionResult"] = Relationship(back_populates="job_description")
