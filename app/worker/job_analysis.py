@@ -12,6 +12,8 @@ from app.repository.resume_vector_repository import SqlResumeVectorRepository
 
 from app.models.job_description import JobDescription
 from app.crud.job_description import job_description_crud
+from app.crud.job_description_result import job_description_analysis_result_crud
+from app.schemas.job_description import JobDescriptionResultCreate 
 from app.providers.embedding_provider import EmbeddingsProvider
 from app.providers.llm_provider import OpenAIProvider
 from app.providers.prompt_generator import AnalysisPromptGenerator
@@ -51,7 +53,7 @@ def send_job_analysis_task(
 	with Session(engine) as session:
 		try:
 			# 채용공고 DB에 저장
-			job_description_crud.create_from_content(
+			jd_obj = job_description_crud.create_from_content(
 				db=session, content=job_description, resume_id=resume_id
 			)
 
@@ -80,7 +82,15 @@ def send_job_analysis_task(
 				job_description=job_description
 			)
 
-			logger.info(f"Task {task_id}: Analysis successful.")
+			validated_data = JobDescriptionResultCreate.model_validate(analysis_result)
+
+			job_description_analysis_result_crud.create(
+				db=session,
+                result_in=validated_data,
+                job_description_id=jd_obj.id
+			)
+
+			logger.info(f"Task {task_id}: Analysis successful and result saved.")
 			update_task_status(task_id, TaskJobStatus.COMPLETED, result=analysis_result)
 		except Exception as e:
 			logger.error(f"Task {task_id}: Analysis failed. Error: {e}", exc_info=True)
