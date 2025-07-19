@@ -39,26 +39,28 @@ This is the high-quality, structured JSON output I expect. All text values must 
     "MLOps 구축 및 운영을 통한 모델 서빙 및 배포 자동화"
     ]
   }},
+  "job_keywords": ["RAG", "LLM", "FastAPI", "AWS", "Python"],
+  "resume_keywords": ["FastAPI", "Docker", "RAG", "LangChain", "LLM"],
   "resume_strengths": [
     {{
       "keyword": "RAG 파이프라인 개발",
-      "evidence": "이력서의 'RAG 기반 AI 이력서 분석 시스템 개발' 프로젝트 경험이 채용공고의 우대사항 "RAG 기반 AI 시스템 설계 및 구현 경험을 보유하신 분"과 부합해요."
+      "evidence": "이력서의 'RAG 기반 AI 이력서 분석 시스템 개발' 프로젝트 경험이 채용공고의 우대사항 "RAG 기반 AI 시스템 설계 및 구현 경험을 보유하신 분"과 부합해요!"
     }},
     {{
       "keyword": "FastAPI 기반 서버 개발",
-      "evidence": "이력서에 명시된 'FastAPI를 이용한 고성능 API 서버 개발 및 MSA 환경 배포' 이 해당 직무에 관한 "백엔드 아키텍처 설계 및 운영 (On-Premise 및 Cloud 환경)"에 부합해보여요."
+      "evidence": "이력서에 명시된 'FastAPI를 이용한 고성능 API 서버 개발 및 MSA 환경 배포' 이 해당 직무에 관한 "백엔드 아키텍처 설계 및 운영 (On-Premise 및 Cloud 환경)"에 부합해요!"
     }}
   ],
-  "overall_assessment": {{
-    "score": 90,
-    "summary": "AI 백엔드 개발자 직무에 매우 적합해보여요! 특히 LLM과 RAG 파이프라인 구축한 경험이 핵심 자격요건과 일치하고, FastAPI 및 Docker 활용 능력 또한 실무에 즉시 기여할 수 있는 수준이라고 보여집니다."
-  }},
-  "areas_for_improvement": [
+  "resume_weaknesses": [
     {{
-      "area": "특정 클라우드 서비스 경험",
-      "reasoning": "채용공고에 AWS ElasticBeanstalk이 언급되어 있으나, 이력서에는 포괄적인 AWS 경험만 기재되어 있어 해당 서비스 경험을 구체화하면 좋습니다."
+      "keyword": "특정 클라우드 서비스 경험",
+      "evidence": "채용공고에 AWS ElasticBeanstalk이 언급되어 있으나, 이력서에는 포괄적인 AWS 경험만 기재되어 있어해당 서비스에 대한 구체적인 경험을 개선하면 좋을 것 같아요!."
     }}
-  ]
+  ],
+    "overall_assessment": {{
+    "score": 85,
+    "summary": "AI 백엔드 개발자 직무에 매우 적합해보여요! 특히 LLM과 RAG 파이프라인 구축한 경험이 핵심 자격요건과 일치하고, FastAPI 및 Docker 활용 능력 또한 실무에 즉시 기여할 수 있는 수준이라고 보여집니다."
+  }}
 }}
 ```
 
@@ -73,10 +75,14 @@ Use the following rubric to determine the job fit score. Be strict and objective
 **5. 당신의 임무 (Your Task):**
 Based on the provided information, perform the following steps and generate a single, valid JSON object as your final output. **All responses MUST be in Korean.**
 
-a. **Analyze Job Description:** First, carefully read the job description. Extract the official job title and a list of key required skills/technologies. Then, summarize the 2-4 most critical required competencies from the '주요업무' and '자격요건' sections.
-b. **Analyze Resume Strengths:** Compare the extracted required competencies with the candidate's resume excerpts. Identify up to 3 key strengths. For each strength, specify the `keyword` (the competency) and the `evidence` (a specific part of the resume that supports it).
-c. **Final Evaluation:** Provide an overall assessment, including a job fit score (1-100) and a summary. Also, identify up to 2 areas for improvement, offering constructive feedback.
-d. **Format as JSON:** Combine all the analysis into a single JSON object that strictly follows the structure provided in the example above. Do not add any text or explanations outside of the JSON structure.
+a. **Summarize Job & Extract Keywords:** First, read the job description. Extract the job title (`name`) and a list of key duties (`skill`). Then, extract a list of important technical keywords (`job_keywords`).
+b. **Extract Resume Keywords:** Read the resume excerpts and extract a list of key technical keywords (`resume_keywords`).
+c. **Analyze Strengths & Weaknesses:** Objectively compare the job description and resume.
+   - Identify **up to 3** key strengths. **If no clear strengths are found, return an empty array `[]`.**
+   - Identify **up to 2** key weaknesses. **If no clear weaknesses are found, return an empty array `[]`.**
+   - For each, specify the `keyword` and provide `evidence` or reasoning.
+d. **Final Evaluation:** Provide an overall assessment, including a job fit `score` based on the rubric and a concise `summary`.
+e. **Format as JSON:** Combine all the analysis into a single JSON object that strictly follows the structure provided in the example above. Do not add any text or explanations outside of the JSON structure.
 
 """
         return prompt_template
