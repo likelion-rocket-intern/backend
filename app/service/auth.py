@@ -59,6 +59,7 @@ class AuthService:
         # JWT 토큰 생성
         access_token = security.create_access_token(user_info=user_info)
         refresh_token = security.create_refresh_token(user_info=user_info)
+
         
         # Update refresh token in DB
         db_user.refresh_token = refresh_token

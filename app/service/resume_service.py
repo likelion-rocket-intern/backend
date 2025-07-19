@@ -1,11 +1,12 @@
 from sqlmodel import Session
+from konlpy.tag import *
 from app.crud.resume import resume_crud
-from app.models.resume import Resume
+from app.models.resume import Resume, ResumeKeyword, ResumeEmbedding
 from typing import Optional, List
 from fastapi import HTTPException
 from app.core.config import settings
-from app.models.resume_embedding import ResumeEmbedding
 from app.models.embedding import Embedding
+from app.utils.word2vec import WordVectorModelLoader
 import json
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
@@ -140,6 +141,8 @@ class ResumeService:
             loader = PyMuPDFLoader(file_path)
         elif file_extenstion in ['doc', 'docx']:
             loader = Docx2txtLoader(file_path)
+
+        similar_words_list = self.analysis_keywords(loader.load())
         
         # 로드와 동시에 청킹
         documents = loader.load_and_split(text_splitter=text_splitter)
@@ -152,7 +155,7 @@ class ResumeService:
         #     print(f"내용: {doc.page_content[:200]}...")
         #     print("-" * 30)
         
-        return documents
+        return documents, similar_words_list
         
     def create_embeddings(self, chunks: List[Document]) -> List[List[float]]:
         try:
@@ -308,5 +311,47 @@ class ResumeService:
                     "weaknesses": weaknesses_evaluation_scores
                 }
             }
-    
+
+    def analysis_keywords(self, documents: Document):
+
+        json_keywords_list = WordVectorModelLoader().get_json_keywords_list()
+        model = WordVectorModelLoader().get_model()
+        SIMILARITY_THRESHOLD = settings.SIMILARITY_THRESHOLD
+
+        full_text = ""
+        for doc in documents:
+            full_text += doc.page_content + "\n"
+
+        okt = Okt()
+        okt_morphs = okt.morphs(full_text)
+
+        resume_dict = {}
+        for word in okt_morphs:
+            resume_dict[word] = resume_dict.get(word, 0) + 1
+
+        similar_words_list = []
+
+        try:
+            for resume_word, freq in resume_dict.items():
+                for criterion_keyword in json_keywords_list:
+                    try:
+                        similarity = model.similarity(resume_word, criterion_keyword)
+                        if similarity >= SIMILARITY_THRESHOLD:
+                            similar_words_list.append({
+                                'keyword': resume_word,
+                                'similar_to': criterion_keyword,
+                                'similarity': similarity,
+                                'frequency': freq
+                            })
+                    except KeyError:
+                        continue
+            sorted_list = sorted(similar_words_list, 
+                                key=lambda x: (round(x['similarity'], 4), x['frequency']), 
+                                reverse=True)
+
+            return sorted_list
+
+        except Exception as e:
+            print(f"오류 발생: {e}")
+
 resume_service = ResumeService()

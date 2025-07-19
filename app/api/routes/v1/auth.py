@@ -37,7 +37,7 @@ async def kakao_callback(
         # refresh 토큰을 쿠키에 설정
         response.set_cookie(
             key="refresh_token",
-            value=token.refresh_token,
+            value=token.refresh_token, 
             httponly=True,
             secure=settings.USE_HTTPS,  # 환경에 따라 설정
             samesite="lax",
