@@ -1,0 +1,28 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus 자체 모니터링
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # FastAPI 이력서 분석 서비스 (같은 네트워크에서)
+  - job_name: 'resume-analyzer-api'
+    static_configs:
+      - targets: ['resume_matching:18000']  # 기존 서비스 컨테이너명:포트
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Dramatiq 워커 (만약 별도 포트에서 메트릭 노출한다면)
+  # - job_name: 'dramatiq-workers'
+  #   static_configs:
+  #     - targets: ['resume_matching:9090']  # 워커 메트릭 포트
+  #   metrics_path: '/metrics'
+  #   scrape_interval: 15s

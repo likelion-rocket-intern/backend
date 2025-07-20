@@ -127,7 +127,6 @@ def init_job_profiles():
         except Exception as e:
             logger.error(f"직군 프로필 초기화 중 오류 발생: {e}")
             session.rollback()
-    
 
 def main() -> None:
     logger.info("Starting embedding initialization")
