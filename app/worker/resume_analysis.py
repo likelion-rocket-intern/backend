@@ -24,7 +24,6 @@ def update_task_status(message_id: str, status: TaskResumeStatus, result: dict =
     redis_client.set(f"task:{message_id}", json.dumps(task_data))
     redis_client.expire(f"task:{message_id}", 86400)  # 24시간 후 만료
 
-
 def get_task_status(message_id: str) -> dict:
     """Redis에서 작업 상태 조회"""
     task_data = redis_client.get(f"task:{message_id}")
@@ -88,7 +87,7 @@ def send_resume_analysis(
                 # similar_words_list를 ResumeKeyword로 변환하여 저장
                 new_resume.resume_keywords = [
                     ResumeKeyword(
-                        keyword=similar_word["word"],
+                        keyword=similar_word["keyword"],  # "word"를 "keyword"로 수정
                         similar_to=similar_word["similar_to"],
                         similarity=similar_word["similarity"],
                         frequency=similar_word["frequency"]
@@ -125,6 +124,14 @@ def send_resume_analysis(
                 "filename": original_filename,
                 "user_id": user_id,
                 "resume_id": new_resume.id,
+                "analysis_keywords": [
+                    {
+                        "keyword": item["keyword"],
+                        "similar_to": item["similar_to"],
+                        "similarity": float(item["similarity"]),  # numpy.float32를 float로 변환
+                        "frequency": item["frequency"]
+                    } for item in similar_words_list
+                ],
                 "analysis_result": analysis_result  # 로 변환 완료
             }
             update_task_status(task_id, TaskResumeStatus.COMPLETED, result)
