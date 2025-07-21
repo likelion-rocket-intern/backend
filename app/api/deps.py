@@ -44,7 +44,7 @@ def get_current_user(
     refresh_token: RefreshTokenDep,
     response: Response
 ) -> User:
-    if not access_token:
+    if not access_token and not refresh_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",

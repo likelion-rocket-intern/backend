@@ -5,8 +5,7 @@ from app.core.redis import get_redis_client
 from app.schemas.status import TaskResumeStatus
 from app.core.db import engine
 from sqlmodel import Session
-from app.models.resume import Resume
-from app.models.resume_embedding import ResumeEmbedding
+from app.models.resume import Resume, ResumeEmbedding, ResumeKeyword
 from app.service.resume_service import resume_service
 from app.crud import resume_crud
 from app.utils.storage import download_resume, delete_resume
@@ -24,7 +23,6 @@ def update_task_status(message_id: str, status: TaskResumeStatus, result: dict =
     }
     redis_client.set(f"task:{message_id}", json.dumps(task_data))
     redis_client.expire(f"task:{message_id}", 86400)  # 24시간 후 만료
-
 
 def get_task_status(message_id: str) -> dict:
     """Redis에서 작업 상태 조회"""
@@ -69,7 +67,7 @@ def send_resume_analysis(
                     raise Exception("Failed to download file from storage")
 
                 # 2. 파일 파싱 & 청킹
-                chunks = resume_service.parse_and_chunk_resume(temp_file_path, upload_filename, original_filename)
+                chunks, similar_words_list = resume_service.parse_and_chunk_resume(temp_file_path, upload_filename, original_filename)
                 update_task_status(task_id, TaskResumeStatus.PARSING, {"message": "파일 파싱 중입니다."})
                 
                 # 3. 청크 임베딩
@@ -84,6 +82,17 @@ def send_resume_analysis(
                         embedding=vector
                     )
                     for idx, (chunk, vector) in enumerate(zip(chunks, vectors))
+                ]
+
+                # similar_words_list를 ResumeKeyword로 변환하여 저장
+                new_resume.resume_keywords = [
+                    ResumeKeyword(
+                        keyword=similar_word["keyword"],  # "word"를 "keyword"로 수정
+                        similar_to=similar_word["similar_to"],
+                        similarity=similar_word["similarity"],
+                        frequency=similar_word["frequency"]
+                    )
+                    for similar_word in similar_words_list
                 ]
                 
                 # 5. 한 트랜잭션으로 저장
@@ -115,6 +124,14 @@ def send_resume_analysis(
                 "filename": original_filename,
                 "user_id": user_id,
                 "resume_id": new_resume.id,
+                "analysis_keywords": [
+                    {
+                        "keyword": item["keyword"],
+                        "similar_to": item["similar_to"],
+                        "similarity": float(item["similarity"]),  # numpy.float32를 float로 변환
+                        "frequency": item["frequency"]
+                    } for item in similar_words_list
+                ],
                 "analysis_result": analysis_result  # 로 변환 완료
             }
             update_task_status(task_id, TaskResumeStatus.COMPLETED, result)

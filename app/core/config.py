@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     FRONTEND_HOST: str = os.getenv("FRONTEND_HOST", "http://localhost:3000")
+    #https://api.ai-resume.kknaks.site
     BACKEND_HOST: str = os.getenv("BACKEND_HOST", "https://api.ai-resume.kknaks.site")
     USE_HTTPS: bool = os.getenv("USE_HTTPS", "false").lower() == "true"
     COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "kknaks.site")
@@ -99,6 +100,7 @@ class Settings(BaseSettings):
     # OpenAI Settings
     OPENAI_API_KEY: str = ""
     OPENAI_EMBEDDING_MODEL: str = "text-embedding-3-small"
+    OPENAI_MODEL: str = "gpt-4o"
 
     # 진로 API KEY
     JINRO_API_KEY: str = ""
@@ -128,6 +130,8 @@ class Settings(BaseSettings):
     NCP_SECRET_KEY: str
     NCP_BUCKET_NAME: str
     NCP_REGION: str
+
+    SIMILARITY_THRESHOLD: float = 0.5
     
     @computed_field
     @property

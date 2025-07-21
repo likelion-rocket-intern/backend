@@ -7,4 +7,6 @@ htmlcov
 .cache
 .venv
 .env
-.env2
+.env.prod
+.env.local
+datas/cc.ko.300.vec

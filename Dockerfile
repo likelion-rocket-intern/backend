@@ -7,8 +7,12 @@ WORKDIR /app/
 # Create datas directory
 RUN mkdir -p /app/datas
 
-# Install supervisor
-RUN apt-get update && apt-get install -y supervisor
+# Install supervisor and Java
+RUN apt-get update && apt-get install -y supervisor default-jdk
+
+# Set JAVA_HOME in container
+ENV JAVA_HOME=/usr/lib/jvm/default-java
+ENV PATH=$JAVA_HOME/bin:$PATH
 
 # Install uv
 # Ref: https://docs.astral.sh/uv/guides/integration/docker/#installing-uv

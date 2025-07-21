@@ -1,11 +1,12 @@
 from sqlmodel import Session
+from konlpy.tag import *
 from app.crud.resume import resume_crud
-from app.models.resume import Resume
+from app.models.resume import Resume, ResumeKeyword, ResumeEmbedding
 from typing import Optional, List
 from fastapi import HTTPException
 from app.core.config import settings
-from app.models.resume_embedding import ResumeEmbedding
 from app.models.embedding import Embedding
+from app.utils.word2vec import WordVectorModelLoader
 import json
 from langchain_openai import OpenAIEmbeddings
 from langchain_core.documents import Document
@@ -18,10 +19,29 @@ from app.repository.sql_embedding_repository import SqlEmbeddingRepository
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import pandas as pd
+import logging
 
+logger = logging.getLogger(__name__)
 
 class ResumeService:
+    _instance = None
+    _model = None
+    _json_keywords_list = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            logger.info("Creating new ResumeService instance")
+            cls._instance = super(ResumeService, cls).__new__(cls)
+            # 초기화 상태 설정
+            cls._instance._initialized = False
+        return cls._instance
+    
     def __init__(self):
+        # __new__에서 생성된 인스턴스의 초기화가 이미 완료되었다면 초기화 건너뛰기
+        if self._initialized:
+            return
+            
+        logger.info("Initializing ResumeService")
         # HuggingFace Embedding 모델 벡터 차원수가 1024 이므로 맞춰주어야합니다.
         # 만약 HuggingFace 모델을 사용하신다면 변경하시면 됩니다.
         """
@@ -37,6 +57,26 @@ class ResumeService:
             api_key=settings.OPENAI_API_KEY,
             dimensions=1024
         )
+        self._initialized = True
+
+    @classmethod
+    def load_models(cls):
+        """워커 마스터 프로세스에서 호출될 모델 로딩 메서드"""
+        from app.utils.word2vec import WordVectorModelLoader
+        loader = WordVectorModelLoader()
+        loader.load_model()
+        loader.load_json_keywords_list()
+        cls._model = loader.get_model()
+        cls._json_keywords_list = loader.get_json_keywords_list()
+        logger.info("Word2Vec model and keywords loaded successfully in ResumeService")
+
+    @classmethod
+    def get_model(cls):
+        return cls._model
+
+    @classmethod
+    def get_keywords_list(cls):
+        return cls._json_keywords_list
 
     def create(
         self,
@@ -140,6 +180,8 @@ class ResumeService:
             loader = PyMuPDFLoader(file_path)
         elif file_extenstion in ['doc', 'docx']:
             loader = Docx2txtLoader(file_path)
+
+        similar_words_list = self.analysis_keywords(loader.load())
         
         # 로드와 동시에 청킹
         documents = loader.load_and_split(text_splitter=text_splitter)
@@ -152,7 +194,7 @@ class ResumeService:
         #     print(f"내용: {doc.page_content[:200]}...")
         #     print("-" * 30)
         
-        return documents
+        return documents, similar_words_list
         
     def create_embeddings(self, chunks: List[Document]) -> List[List[float]]:
         try:
@@ -308,5 +350,48 @@ class ResumeService:
                     "weaknesses": weaknesses_evaluation_scores
                 }
             }
-    
+
+    def analysis_keywords(self, documents: Document):
+        SIMILARITY_THRESHOLD = settings.SIMILARITY_THRESHOLD
+
+        full_text = ""
+        for doc in documents:
+            full_text += doc.page_content + "\n"
+
+        okt = Okt()
+        okt_morphs = okt.morphs(full_text)
+
+        resume_dict = {}
+        for word in okt_morphs:
+            resume_dict[word] = resume_dict.get(word, 0) + 1
+
+        similar_words_list = []
+
+        try:
+            if not self._model or not self._json_keywords_list:
+                raise RuntimeError("모델이 로드되지 않았습니다. 워커에서 load_models()를 호출해주세요.")
+
+            for resume_word, freq in resume_dict.items():
+                for criterion_keyword in self._json_keywords_list:
+                    try:
+                        similarity = self._model.similarity(resume_word, criterion_keyword)
+                        if similarity >= SIMILARITY_THRESHOLD:
+                            similar_words_list.append({
+                                'keyword': resume_word,
+                                'similar_to': criterion_keyword,
+                                'similarity': similarity,
+                                'frequency': freq
+                            })
+                    except KeyError:
+                        continue
+            sorted_list = sorted(similar_words_list, 
+                                key=lambda x: (round(x['similarity'], 4), x['frequency']), 
+                                reverse=True)
+
+            return sorted_list
+
+        except Exception as e:
+            logger.error(f"Error in analysis_keywords: {e}")
+            raise
+
 resume_service = ResumeService()
