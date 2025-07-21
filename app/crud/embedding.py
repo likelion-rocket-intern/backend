@@ -25,6 +25,17 @@ class CRUDEmbedding:
         results = db.exec(statement).all()
         return list(results)
 
+    def get_by_exact_skills(self, db: Session, *, skills: List[str], object_type: str) -> Embedding | None:
+        """
+        extra_data 안의 skill 리스트가 정확히 일치하는 데이터를 찾습니다.
+        """
+        sorted_skills = sorted(skills)
+        statement = select(Embedding).where(
+            Embedding.object_type == object_type,
+            Embedding.extra_data['skill'].astext == str(sorted_skills)
+        )
+        return db.exec(statement).first()
+
     def update(self, db: Session, *, embedding_obj: Embedding, **kwargs) -> Embedding:
         for key, value in kwargs.items():
             setattr(embedding_obj, key, value)

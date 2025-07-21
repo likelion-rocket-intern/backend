@@ -8,11 +8,19 @@ class CRUDJobDescriptionResult:
         self,
         db: Session,
         *,
-        result: JobDescriptionResultCreate 
+        result: JobDescriptionResultCreate,
+        job_description_id: int
     ) -> JobDescriptionResult:
-        db.add(result)
+        result_dict = result.model_dump()
+
+        db_obj = JobDescriptionResult(
+            result=result_dict,
+            job_description_id=job_description_id
+        )
+
+        db.add(db_obj)
         db.commit()
-        db.refresh(result)
+        db.refresh(db_obj)
         return result
 
     def get_by_id(self, db: Session, id: int) -> Optional[JobDescriptionResult]:

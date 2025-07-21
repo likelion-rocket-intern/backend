@@ -75,7 +75,7 @@ Use the following rubric to determine the job fit score. Be strict and objective
 **5. 당신의 임무 (Your Task):**
 Based on the provided information, perform the following steps and generate a single, valid JSON object as your final output. **All responses MUST be in Korean.**
 
-a. **Summarize Job & Extract Keywords:** First, read the job description. Extract the job title (`name`) and a list of key duties (`skill`). Then, extract a list of important technical keywords (`job_keywords`).
+a. **Summarize Job & Extract Keywords:** First, read the job description. Extract the official job title (`name`) and a list of key duties (`skill`). **The `name` MUST be one of the following 12 categories:** ["백엔드 개발자", "프론트엔드 개발자", "AI 개발자", "마케터", "사업개발 매니저", "게임 개발자", "UIUX 디자이너", "임베디드 개발자", "클라우드 엔지니어", "데브옵스 & 인프라", "데이터 엔지니어", "앱 개발자"]. Then, extract a list of important technical keywords (`job_keywords`).
 b. **Extract Resume Keywords:** Read the resume excerpts and extract a list of key technical keywords (`resume_keywords`).
 c. **Analyze Strengths & Weaknesses:** Objectively compare the job description and resume.
    - Identify **up to 3** key strengths. **If no clear strengths are found, return an empty array `[]`.**

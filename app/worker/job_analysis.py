@@ -18,6 +18,8 @@ from app.providers.embedding_provider import EmbeddingsProvider
 from app.providers.llm_provider import OpenAIProvider
 from app.providers.prompt_generator import AnalysisPromptGenerator
 
+from app.worker.data_curation import add_job_data_task
+
 logger = logging.getLogger(__name__)
 
 redis_client = get_redis_client()
@@ -86,12 +88,16 @@ def send_job_analysis_task(
 
 			job_description_analysis_result_crud.create(
 				db=session,
-                result_in=validated_data,
+                result=validated_data,
                 job_description_id=jd_obj.id
 			)
 
 			logger.info(f"Task {task_id}: Analysis successful and result saved.")
 			update_task_status(task_id, TaskJobStatus.COMPLETED, result=analysis_result)
+
+			job_summary_data = validated_data.job_summary.model_dump()
+			add_job_data_task.send(job_summary=job_summary_data)
+
 		except Exception as e:
 			logger.error(f"Task {task_id}: Analysis failed. Error: {e}", exc_info=True)
 			# 실패 시 에러 메시지를 결과에 담아 상태를 업데이트합니다.
