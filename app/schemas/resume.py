@@ -27,7 +27,7 @@ class ResumeDetailResponse(BaseModel):
     original_filename: str | None = None
     upload_filename: str | None = None
     file_url: str | None = None
-    file_path: str | None = None  # For backward compatibility
+    # file_path: str | None = None  # For backward compatibility
     keywords: List[Keyword]
     analysis_result: str | dict
     created_at: datetime
