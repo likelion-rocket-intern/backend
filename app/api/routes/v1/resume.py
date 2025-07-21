@@ -141,7 +141,15 @@ async def get_resume_list(
                     id=resume.id,
                     user_id=resume.user_id,
                     version=resume.version,
-                    file_path=resume.file_path,
+                    file_path=resume.file_url,
+                    keywords=[
+                        Keyword(
+                            keyword=kw.keyword,
+                            similar_to=kw.similar_to,
+                            similarity=float(kw.similarity),
+                            frequency=kw.frequency
+                        ) for kw in resume.resume_keywords
+                    ],
                     analysis_result=resume.analysis_result,
                     created_at=resume.created_at
                 )

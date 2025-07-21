@@ -44,6 +44,7 @@ alembic upgrade head
 
 # 5. 서버실행
 uvicorn app.main:app --reload
+uvicorn app.main:app --reload --port 18000
 
 # 6. dramatiq 워커실행
 ./scripts/worker-start.sh
@@ -51,7 +52,21 @@ or
 dramatiq app.worker.resume_analysis app.worker.__init__ --processes 2 --threads 4
 
 # 6. 도커 빌드 & 실행
-docker build -t ll-rocket-backend . && docker run ll-rocket-backend
+docker build -t ll-rocket-backend .
+
+# 7. 로컬에서 도커 네트워크생성
+docker network create resume_matching
+
+# 8. 로컬에서 도커 실행
+docker run -d --name=ll_rocket_backend \
+  --network=resume_matching \
+  --network-alias=resume_matching \
+  --restart unless-stopped \
+  -p 18000:18000 \
+  -e TZ=Asia/Seoul \
+  -v $(pwd)/datas:/app/datas \
+  -v $(pwd)/.env.local:/app/.env \
+  ll-rocket-backend
 
 <!-- resumes = db.query(Resume).options(selectinload(Resume.user)).all()
 user = db.query(User).options(selectinload(User.resumes)).first() -->
