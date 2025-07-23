@@ -47,7 +47,7 @@ def init_embedding(db_engine: Engine):
                 except Exception as e:
                     logger.error(f"'{file_path}' 처리 중 오류 발생: {e}")
 
-def init_job_profiles():
+def init_job_profiles(session: Session):
     """직군 프로필 데이터를 JSON 파일에서 읽어 DB에 초기화"""
     
     profile_file_path = os.path.join(DATA_DIR, "jinro_data.json")
@@ -72,67 +72,67 @@ def init_job_profiles():
         "app_developer": "앱 개발자"
     }
     
-    with Session(engine) as session:
-        try:
-            logger.info("직군 프로필 초기화 시작...")
+    #with Session(engine) as session:
+    try:
+        logger.info("직군 프로필 초기화 시작...")
+        
+        # JSON 파일 읽기
+        with open(profile_file_path, 'r', encoding='utf-8') as f:
+            profiles_data = json.load(f)
+        
+        # 기존 직군 타입들을 가져옴
+        existing_job_types = {
+            profile.job_type 
+            for profile in session.exec(select(JobProfile))
+        }
+        
+        # 각 직군 프로필을 DB에 저장 (없는 것만)
+        created_count = 0
+        skipped_count = 0
+        for job_type, profile_data in profiles_data.items():
+            # 이미 존재하는 job_type이면 건너뜀
+            if job_type in existing_job_types:
+                skipped_count += 1
+                continue
             
-            # JSON 파일 읽기
-            with open(profile_file_path, 'r', encoding='utf-8') as f:
-                profiles_data = json.load(f)
+            job_profile = JobProfile(
+                job_type=job_type,
+                job_name_ko=job_name_mapping.get(job_type, job_type),
+                description=profile_data["definition"],
+                stability=profile_data["stability"],
+                creativity=profile_data["creativity"],
+                social_service=profile_data["social_service"],
+                ability_development=profile_data["ability_development"],
+                conservatism=profile_data["conservatism"],
+                social_recognition=profile_data["social_recognition"],
+                autonomy=profile_data["autonomy"],
+                self_improvement=profile_data["self_improvement"],
+                is_active=True
+            )
             
-            # 기존 직군 타입들을 가져옴
-            existing_job_types = {
-                profile.job_type 
-                for profile in session.exec(select(JobProfile))
-            }
-            
-            # 각 직군 프로필을 DB에 저장 (없는 것만)
-            created_count = 0
-            skipped_count = 0
-            for job_type, profile_data in profiles_data.items():
-                # 이미 존재하는 job_type이면 건너뜀
-                if job_type in existing_job_types:
-                    skipped_count += 1
-                    continue
-                
-                job_profile = JobProfile(
-                    job_type=job_type,
-                    job_name_ko=job_name_mapping.get(job_type, job_type),
-                    description=profile_data["definition"],
-                    stability=profile_data["stability"],
-                    creativity=profile_data["creativity"],
-                    social_service=profile_data["social_service"],
-                    ability_development=profile_data["ability_development"],
-                    conservatism=profile_data["conservatism"],
-                    social_recognition=profile_data["social_recognition"],
-                    autonomy=profile_data["autonomy"],
-                    self_improvement=profile_data["self_improvement"],
-                    is_active=True
-                )
-                
-                session.add(job_profile)
-                created_count += 1
-                logger.info(f"직군 프로필 추가: {job_type} ({job_name_mapping.get(job_type, job_type)})")
-            
-            if created_count > 0:
-                session.commit()
-                logger.info(f"직군 프로필 초기화 완료. {created_count}개 추가, {skipped_count}개 건너뜀")
-            else:
-                logger.info(f"추가할 새 직군 프로필이 없습니다. (기존 프로필: {skipped_count}개)")
-            
-        except FileNotFoundError:
-            logger.error(f"프로필 파일 '{profile_file_path}'를 찾을 수 없습니다.")
-        except json.JSONDecodeError as e:
-            logger.error(f"JSON 파일 파싱 오류: {e}")
-        except Exception as e:
-            logger.error(f"직군 프로필 초기화 중 오류 발생: {e}")
-            session.rollback()
+            session.add(job_profile)
+            created_count += 1
+            logger.info(f"직군 프로필 추가: {job_type} ({job_name_mapping.get(job_type, job_type)})")
+        
+        if created_count > 0:
+            session.commit()
+            logger.info(f"직군 프로필 초기화 완료. {created_count}개 추가, {skipped_count}개 건너뜀")
+        else:
+            logger.info(f"추가할 새 직군 프로필이 없습니다. (기존 프로필: {skipped_count}개)")
+        
+    except FileNotFoundError:
+        logger.error(f"프로필 파일 '{profile_file_path}'를 찾을 수 없습니다.")
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON 파일 파싱 오류: {e}")
+    except Exception as e:
+        logger.error(f"직군 프로필 초기화 중 오류 발생: {e}")
+        session.rollback()
 
 def main() -> None:
     logger.info("Starting embedding initialization")
     init_embedding(engine)
-    init_job_profiles()
+    init_job_profiles(Session(engine))
     logger.info("Finished embedding initialization")
 
 if __name__ == "__main__":
-    main() 
+    main()
