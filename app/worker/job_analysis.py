@@ -102,7 +102,6 @@ def send_job_analysis_task(
 	task_id: str, 
 	user_id: int, 
 	resume_id: int, 
-	job_description: str,
 	job_request: dict
 	):
 	"""
@@ -115,15 +114,6 @@ def send_job_analysis_task(
 		try:
 			content = crawl_url(job_request['jd_url'])
 			# 채용공고 DB에 저장
-			jd_obj = job_description_crud.create_from_content(
-                db=session, 
-                content=content['raw_data'], 
-                jinro_id=job_request['jinro_id'],
-                jd_url=job_request['jd_url'],
-                resume_id=job_request['resume_id']
-            )
-
-
 
 			vector_repo = SqlResumeVectorRepository(db=session, embeddings_model=embeddings_provider.get_model())
 
@@ -133,9 +123,9 @@ def send_job_analysis_task(
 				llm_provider=main_llm_provider,
 			)
 
-            user = user_crud.get(db=session, id=user_id)
-            if not user:
-                raise ValueError(f"User with id {user_id} not found.")
+			user = user_crud.get(db=session, id=user_id)
+			if not user:
+				raise ValueError(f"User with id {user_id} not found.")
 
 			analysis_result = service.analyze_job_fit(
 				db=session,
@@ -149,15 +139,14 @@ def send_job_analysis_task(
 				raise ValueError("LLM analysis result is missing 'job_summary' key.")
 
 			job_details_schema = JobDescriptionSchema.model_validate(job_details_data)
+			flattened_data_for_result = {**analysis_result, **job_details_data}
+			del flattened_data_for_result['job_summary']
+			analysis_result_schema = JobDescriptionResultCreate.model_validate(flattened_data_for_result)
 				
-			analysis_result_schema = JobDescriptionResultCreate.model_validate(analysis_result)
-				
-
-			validated_data = JobDescriptionResultCreate.model_validate(analysis_result)
 
 			job_description_crud.create_jd_and_result(
-                db=session, jd_url=jd_url,
-                content=job_description,
+                db=session, jd_url=job_request['jd_url'],
+                content=content['raw_data'],
                 job_details=job_details_schema,
                 analysis_result=analysis_result_schema
             )
@@ -169,8 +158,6 @@ def send_job_analysis_task(
 
 		except Exception as e:
 			logger.error(f"Task {task_id}: Analysis failed. Error: {e}", exc_info=True)
-			# 실패 시 에러 메시지를 결과에 담아 상태를 업데이트합니다.
 			error_result = {"error": str(e)}
 			update_task_status(task_id, TaskJobStatus.FAILED, result=error_result)
-			# 에러를 다시 발생시켜 Dramatiq의 재시도 로직이 동작하도록 합니다.
 			raise
