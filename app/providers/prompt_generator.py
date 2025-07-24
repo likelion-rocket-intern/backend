@@ -33,14 +33,14 @@ This is the high-quality, structured JSON output I expect. All text values must 
 {{
   "job_summary": {{
     "name": "AI 백엔드 개발자",
-    "skill": [
+    "description": [
     "생성형 AI 플랫폼 활용 Application 설계 및 개발",
     "정형 또는 비정형 데이터 수집 및 처리 파이프라인 설계 및 구현",
     "Python, Golang을 이용한 서비스 구축 및 유지보수",
     "MLOps 구축 및 운영을 통한 모델 서빙 및 배포 자동화"
     ]
+    "tech_stacks": ["RAG", "LLM", "FastAPI", "AWS", "Python"]
   }},
-  "job_keywords": ["RAG", "LLM", "FastAPI", "AWS", "Python"],
   "resume_keywords": ["FastAPI", "Docker", "RAG", "LangChain", "LLM"],
   "resume_strengths": [
     {{
@@ -76,7 +76,7 @@ Use the following rubric to determine the job fit score. Be strict and objective
 **5. 당신의 임무 (Your Task):**
 Based on the provided information, perform the following steps and generate a single, valid JSON object as your final output. **All responses MUST be in Korean.**
 
-a. **Summarize Job & Extract Keywords:** First, read the job description. Extract the official job title (`name`) and a list of key duties (`skill`). **The `name` MUST be one of the following 12 categories:** ["백엔드 개발자", "프론트엔드 개발자", "AI 개발자", "마케터", "사업개발 매니저", "게임 개발자", "UIUX 디자이너", "임베디드 개발자", "클라우드 엔지니어", "데브옵스 & 인프라", "데이터 엔지니어", "앱 개발자"]. Then, extract a list of important technical keywords (`job_keywords`).
+a. **Summarize Job & Extract Keywords:** First, read the job description. Extract the official job title (`name`) and a list of key duties (`description`). **The `name` MUST be one of the following 12 categories:** ["백엔드 개발자", "프론트엔드 개발자", "AI 개발자", "마케터", "사업개발 매니저", "게임 개발자", "UIUX 디자이너", "임베디드 개발자", "클라우드 엔지니어", "데브옵스 & 인프라", "데이터 엔지니어", "앱 개발자"]. Then, extract a list of important technical keywords (`tech_stacks`).
 b. **Extract Resume Keywords:** Read the resume excerpts and extract a list of key technical keywords (`resume_keywords`).
 c. **Analyze Strengths & Weaknesses:** Objectively compare the job description and resume.
    - Identify **up to 3** key strengths. **If no clear strengths are found, return an empty array `[]`.**

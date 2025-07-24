@@ -7,13 +7,15 @@ from app.api.deps import SessionDep, CurrentUser
 from app.schemas.total import TotalRequest, TotalResponse
 from app.schemas.job_description import JobDescriptionRequest, JobAnalysisTaskResponse
 from app.schemas.job_description import JobTaskStatusResponse
-from app.worker.job_analysis import send_job_analysis_task
-from app.worker.job_analysis import get_task_status
+from app.worker import job_analysis
 
 
 router = APIRouter(tags=["jd"])
-@router.post("/analyze", response_model=JobAnalysisTaskResponse)
+
+#JobDescription
+@router.post("/{resume_id}/analyze", response_model=JobAnalysisTaskResponse)
 async def request_job_analysis(
+    resume_id: int,
     job_description_request: JobDescriptionRequest,
     current_user: CurrentUser,
 ) -> JobAnalysisTaskResponse:
@@ -23,9 +25,10 @@ async def request_job_analysis(
     task_id = str(uuid.uuid4())
 
     try:
-        send_job_analysis_task.send(
+        job_analysis.send_job_analysis_task.send(
             task_id=task_id,
             user_id=current_user.id,
+            resume_id=resume_id,
             job_request=job_description_request.model_dump()
         )
 
@@ -48,13 +51,9 @@ async def check_job_task_status(
     """
     특정 이력서에 속한 작업의 상태와 결과를 조회합니다.
     """
-    # 이력서가 현재 사용자의 소유인지 확인
-    # resume = resume_service.get_by_id(db=session, resume_id=resume_id, user_id=current_user.id)
-    # if not resume:
-    #     raise HTTPException(status_code=404, detail="Resume not found or permission denied.")
 
     # Redis에서 작업 상태를 가져옴
-    task_data = get_task_status(task_id)
+    task_data = job_analysis.get_task_status(task_id)
     if not task_data:
         raise HTTPException(status_code=404, detail="Task not found")
     

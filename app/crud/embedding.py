@@ -1,9 +1,26 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from sqlmodel import Session, select
 from app.models.embedding import Embedding
 
 class CRUDEmbedding:
-    def create(self, db: Session, *, embedding_obj: Embedding) -> Embedding:
+    def create(
+            self, 
+            db: Session, 
+            *, 
+            object_id: str, 
+            object_type: str, 
+            embedding: List[float], 
+            extra_data: Dict[str, Any]) -> Embedding:
+        """
+        개별 데이터를 받아 Embedding 객체를 생성하고 DB에 저장합니다.
+        """
+        embedding_obj = Embedding(
+            object_id=object_id,
+            object_type=object_type,
+            embedding=embedding,
+            extra_data=extra_data
+        )
+        
         db.add(embedding_obj)
         db.commit()
         db.refresh(embedding_obj)
@@ -25,14 +42,14 @@ class CRUDEmbedding:
         results = db.exec(statement).all()
         return list(results)
 
-    def get_by_exact_skills(self, db: Session, *, skills: List[str], object_type: str) -> Embedding | None:
+    def get_by_exact_description(self, db: Session, *, description: List[str], object_type: str) -> Embedding | None:
         """
         extra_data 안의 skill 리스트가 정확히 일치하는 데이터를 찾습니다.
         """
-        sorted_skills = sorted(skills)
+        sorted_description = sorted(description)
         statement = select(Embedding).where(
             Embedding.object_type == object_type,
-            Embedding.extra_data['skill'].astext == str(sorted_skills)
+            Embedding.extra_data['description'].astext == str(sorted_description)
         )
         return db.exec(statement).first()
 

@@ -93,6 +93,9 @@ class ResumeService:
         user_id: int
     ) -> Optional[Resume]:
         resume = resume_crud.get_by_id(db=db, resume_id=resume_id)
+        if not resume:
+            return None
+
         if resume.user_id != user_id:
             raise HTTPException(
                 status_code=403,
@@ -181,7 +184,7 @@ class ResumeService:
         elif file_extenstion in ['doc', 'docx']:
             loader = Docx2txtLoader(file_path)
 
-        similar_words_list = self.analysis_keywords(loader.load())
+        # similar_words_list = self.analysis_keywords(loader.load())
         
         # 로드와 동시에 청킹
         documents = loader.load_and_split(text_splitter=text_splitter)
@@ -194,7 +197,7 @@ class ResumeService:
         #     print(f"내용: {doc.page_content[:200]}...")
         #     print("-" * 30)
         
-        return documents, similar_words_list
+        return documents
         
     def create_embeddings(self, chunks: List[Document]) -> List[List[float]]:
         try:
