@@ -7,20 +7,40 @@ from app.models.job_description import (
     JobDescriptionResult
     )
 from app.schemas.job_description import (
-    JobDescriptionResultCreate, 
+    JobDescriptionResultCreate, JobDescriptionRequest,
     JobDescription as JobDescriptionSchema
     )
 
 class CRUDJobDescription:
+    def create_from_content(self, db: Session, *, content: str, resume_id: int, jinro_id: int, jd_url: str) -> JobDescription:
         """
+        데이터베이스에 새로운 채용 공고 내용을 저장합니다.
+        """
+
+        db_obj = JobDescription(
+            content=content,
+            resume_id=resume_id,
+            jinro_id=jinro_id,
+            jd_url=jd_url
+        )
+
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+
+    def get_or_create_tech_stack(self, db: Session, *, name: str) -> TechStack:
+        """
+        TechStack이 존재하면 가져오고, 없으면 생성합니다.
+        """
+        with db.no_autoflush:
             statement = select(TechStack).where(TechStack.name == name)
             existing_tech = db.exec(statement).first()
             if existing_tech:
                 return existing_tech
-        
         new_tech = TechStack(name=name)
         return new_tech
-
+    
     def get_or_create_description(self, db: Session, *, description: str) -> Description:
         """
         Description이 존재하면 가져오고, 없으면 생성합니다.
@@ -63,15 +83,9 @@ class CRUDJobDescription:
         db_jd = JobDescription(
             jd_url=jd_url,
             content=content,
-<<<<<<< HEAD
             name=job_details.name,
             tech_stacks=tech_stack_objects,
             descriptions=description_objects
-=======
-            resume_id=resume_id,
-            jinro_id=jinro_id,
-            jd_url=jd_url
->>>>>>> f172e7cf97fd0745e4b9dc59216bfa98b90c899f
         )
 
         # JobDescriptionResult 객체
