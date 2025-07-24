@@ -2,7 +2,9 @@ from pydantic import BaseModel, Field as PydanticField
 from typing import Dict, Any, Optional, List
 
 class JobDescriptionRequest(BaseModel):
-    content: str
+    jd_url: str
+    resume_id: int
+    jinro_id: int
 
 class JobDescriptionResultResponse(BaseModel):
     analysis_result: Dict[str, Any] 
@@ -33,7 +35,7 @@ class JobDescription(BaseModel):
     description:List[str]
     tech_stacks: List[str]
 
-class JobDescriptionResultBase(BaseModel):
+class JobDescriptionResultBase(JobDescription):
     resume_keywords: List[str]
     resume_strengths: List[ResumeStrengthSchema]
     resume_weaknesses: List[ResumeWeaknessSchema]

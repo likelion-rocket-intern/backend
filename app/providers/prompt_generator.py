@@ -28,6 +28,7 @@ You are a top-tier IT headhunter and career consultant in South Korea. Your prim
 
 **3. 좋은 분석의 예시 (Example of a GOOD Analysis):**
 This is the high-quality, structured JSON output I expect. All text values must be in Korean.
+
 ```json
 {{
   "job_summary": {{

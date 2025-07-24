@@ -12,11 +12,7 @@ from app.schemas.job_description import (
     )
 
 class CRUDJobDescription:
-    def get_or_create_tech_stack(self, db: Session, *, name: str) -> TechStack:
         """
-        TechStack이 존재하면 가져오고, 없으면 생성합니다.
-        """
-        with db.no_autoflush:
             statement = select(TechStack).where(TechStack.name == name)
             existing_tech = db.exec(statement).first()
             if existing_tech:
@@ -67,9 +63,15 @@ class CRUDJobDescription:
         db_jd = JobDescription(
             jd_url=jd_url,
             content=content,
+<<<<<<< HEAD
             name=job_details.name,
             tech_stacks=tech_stack_objects,
             descriptions=description_objects
+=======
+            resume_id=resume_id,
+            jinro_id=jinro_id,
+            jd_url=jd_url
+>>>>>>> f172e7cf97fd0745e4b9dc59216bfa98b90c899f
         )
 
         # JobDescriptionResult 객체
