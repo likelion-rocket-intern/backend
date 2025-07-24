@@ -2,7 +2,9 @@ from pydantic import BaseModel, Field as PydanticField
 from typing import Dict, Any, Optional, List
 
 class JobDescriptionRequest(BaseModel):
-    content: str
+    jd_url: str
+    resume_id: int
+    jinro_id: int
 
 class JobDescriptionResultResponse(BaseModel):
     analysis_result: Dict[str, Any] 
@@ -16,10 +18,6 @@ class JobTaskStatusResponse(BaseModel):
     status: str
     result: Optional[Dict[str, Any]] = None
 
-class JobSummarySchema(BaseModel):
-    name: str
-    skill: List[str]
-
 class OverallAssessmentSchema(BaseModel):
     score: int
     summary: str
@@ -32,13 +30,16 @@ class ResumeWeaknessSchema(BaseModel):
     keyword: str
     evidence: str
 
-class JobDescriptionResultBase(BaseModel):
-    job_summary: JobSummarySchema
-    overall_assessment: OverallAssessmentSchema
-    job_keywords: List[str]
+class JobDescription(BaseModel):
+    name:str
+    description:List[str]
+    tech_stacks: List[str]
+
+class JobDescriptionResultBase(JobDescription):
     resume_keywords: List[str]
     resume_strengths: List[ResumeStrengthSchema]
     resume_weaknesses: List[ResumeWeaknessSchema]
+    overall_assessment: OverallAssessmentSchema
 
 class JobDescriptionResultCreate(JobDescriptionResultBase):
     pass

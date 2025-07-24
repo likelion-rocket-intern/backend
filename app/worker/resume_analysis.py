@@ -31,8 +31,7 @@ def get_task_status(message_id: str) -> dict:
         return json.loads(task_data)
     return {"status": TaskResumeStatus.PENDING, "result": {}}
 
-
-@dramatiq.actor(queue_name="resume_analysis", max_retries=3)
+@dramatiq.actor(queue_name="resume_analysis", max_retries=1)
 def send_resume_analysis(
     file_url: str,
     original_filename: str,
@@ -42,6 +41,7 @@ def send_resume_analysis(
 ) -> None:
     temp_file_path = None
     try:
+        print("send_resume_analysis")
         user_id = int(user_id)
         update_task_status(task_id, TaskResumeStatus.PROCESSING)
         logger.info(f"Starting resume analysis for user: {user_id}, file: {original_filename}")

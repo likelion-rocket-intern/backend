@@ -17,6 +17,8 @@ from app.schemas.job_description import JobDescriptionResultCreate
 from app.providers.embedding_provider import EmbeddingsProvider
 from app.providers.llm_provider import OpenAIProvider
 from app.providers.prompt_generator import AnalysisPromptGenerator
+from app.schemas.job_description import JobDescriptionRequest
+from app.utils.crawler.main_crawler import crawl_url
 
 logger = logging.getLogger(__name__)
 
@@ -38,64 +40,66 @@ def get_task_status(message_id: str) -> dict:
         return json.loads(task_data)
     return {"status": TaskJobStatus.PENDING, "result": {}}
 
-@dramatiq.actor(queue_name="job_analysis", time_limit=300_000, max_retries=3) 
+@dramatiq.actor(queue_name="job_analysis", time_limit=300_000, max_retries=1) 
 def send_job_analysis_task(
-	task_id: str, 
-	user_id: int, 
-	resume_id: int, 
-	job_description: str):
-	"""
-	채용 공고와 이력서를 실제로 분석하는 백그라운드 작업
-	"""
-	logger.info(f"Task {task_id}: Starting job analysis for user_id={user_id}, resume_id={resume_id}")
-	update_task_status(task_id, TaskJobStatus.PROCESSING)
+    task_id: str, 
+    user_id: int, 
+    job_request: dict):
+    """
+    채용 공고와 이력서를 실제로 분석하는 백그라운드 작업
+    """
+    logger.info(f"Task {task_id}: Starting job analysis for user_id={user_id}, resume_id={job_request['resume_id']}, jinro_id={job_request['jinro_id']}")  # 수정
+    update_task_status(task_id, TaskJobStatus.PROCESSING)
 
-	with Session(engine) as session:
-		try:
-			# 채용공고 DB에 저장
-			jd_obj = job_description_crud.create_from_content(
-				db=session, content=job_description, resume_id=resume_id
-			)
+    with Session(engine) as session:
+        try:
+            content = crawl_url(job_request['jd_url'])  # 수정
 
-			embeddings_provider = EmbeddingsProvider()
-			embeddings_model = embeddings_provider.get_model()
+            # 채용공고 DB에 저장
+            jd_obj = job_description_crud.create_from_content(
+                db=session, 
+                content=content['raw_data'], 
+                jinro_id=job_request['jinro_id'],
+                jd_url=job_request['jd_url'],
+                resume_id=job_request['resume_id']
+            )
 
-			vector_repo = SqlResumeVectorRepository(db=session, embeddings_model=embeddings_model)
-			prompt_generator = AnalysisPromptGenerator()
-			llm_provider = OpenAIProvider()
-			
+            embeddings_provider = EmbeddingsProvider()
+            embeddings_model = embeddings_provider.get_model()
 
-			service = JobAnalysisService(
-				vector_repo=vector_repo,
-				prompt_generator=prompt_generator,
-				llm_provider=llm_provider,
-			)
+            vector_repo = SqlResumeVectorRepository(db=session, embeddings_model=embeddings_model)
+            prompt_generator = AnalysisPromptGenerator()
+            llm_provider = OpenAIProvider()
 
-			user = user_crud.get(db=session, id=user_id)
-			if not user:
-				raise ValueError(f"User with id {user_id} not found.")
+            service = JobAnalysisService(
+                vector_repo=vector_repo,
+                prompt_generator=prompt_generator,
+                llm_provider=llm_provider,
+            )
 
-			analysis_result = service.analyze_job_fit(
-				db=session,
-				user=user, 
-				resume_id=resume_id,
-				job_description=job_description
-			)
+            user = user_crud.get(db=session, id=user_id)
+            if not user:
+                raise ValueError(f"User with id {user_id} not found.")
 
-			validated_data = JobDescriptionResultCreate.model_validate(analysis_result)
+            analysis_result = service.analyze_job_fit(
+                db=session,
+                user=user, 
+                resume_id=job_request['resume_id'],
+                job_description=content['raw_data']
+            )
 
-			job_description_analysis_result_crud.create(
-				db=session,
-                result_in=validated_data,
-                job_description_id=jd_obj.id
-			)
+            # validated_data = JobDescriptionResultCreate.model_validate(analysis_result)
 
-			logger.info(f"Task {task_id}: Analysis successful and result saved.")
-			update_task_status(task_id, TaskJobStatus.COMPLETED, result=analysis_result)
-		except Exception as e:
-			logger.error(f"Task {task_id}: Analysis failed. Error: {e}", exc_info=True)
-			# 실패 시 에러 메시지를 결과에 담아 상태를 업데이트합니다.
-			error_result = {"error": str(e)}
-			update_task_status(task_id, TaskJobStatus.FAILED, result=error_result)
-			# 에러를 다시 발생시켜 Dramatiq의 재시도 로직이 동작하도록 합니다.
-			raise
+            # job_description_analysis_result_crud.create(
+            #     db=session,
+            #     result=validated_data,
+            #     job_description_id=jd_obj.id
+            # )
+
+            logger.info(f"Task {task_id}: Analysis successful and result saved.")
+            update_task_status(task_id, TaskJobStatus.COMPLETED, result=analysis_result)
+        except Exception as e:
+            logger.error(f"Task {task_id}: Analysis failed. Error: {e}", exc_info=True)
+            error_result = {"error": str(e)}
+            update_task_status(task_id, TaskJobStatus.FAILED, result=error_result)
+            raise
