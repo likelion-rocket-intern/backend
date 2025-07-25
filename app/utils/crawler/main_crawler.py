@@ -1,4 +1,4 @@
-import requests
+import requests, json
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
 import time
@@ -80,34 +80,66 @@ class JobCrawler:
                 'message': f'{site_name} 크롤러가 아직 구현되지 않은 플랫 폼이거나 크롤링에 실패했습니다.'
             }
 
+def get_wanted_jobs(limit : int = 10):
+    # API URL
+    wanted_url = "https://www.wanted.co.kr/api/v4/jobs"
+
+    # 요청 파라미터
+    params = {
+        "country": "kr",
+        "job_sort": "job.popularity_order",
+        "locations": "all",
+        "years": -1,
+        "limit": limit,  # 한 페이지당 가져올 항목 수
+        "offset": 0   # 시작 위치
+    }
+
+    # HTTP 요청 헤더
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "Accept": "application/json"
+    }
+
+    # 결과를 저장할 리스트
+    jobs_data = []
+
+    # API 요청
+    response = requests.get(wanted_url, params=params, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        
+        # 데이터 추출
+        if 'data' in data:
+            for job in data['data']:
+                jobs_data.append(f"https://www.wanted.co.kr/wd/{job.get('id')}")
+    else:
+        print(f"Error: {response.status_code}")
+
+    return jobs_data
+
 # =========================
 # 사용 함수
 # =========================
 def crawl_url(url):
     """URL을 입력받아서 크롤링"""
+
     crawler = JobCrawler()
     result = crawler.crawl(url)
     return result
 
-# if __name__ == "__main__":
-#     # URL 입력받기
-#     # url = "https://jumpit.saramin.co.kr/position/50843"
-#     # url = "https://www.wanted.co.kr/wd/283067"
-#     # url = "https://www.wanted.co.kr/wd/284408"
-#     # url = "https://www.jobkorea.co.kr/Recruit/GI_Read/46733476?Oem_Code=C1&logpath=1&stext=%EB%B0%B1%EC%97%94%EB%93%9C&listno=1&sc=632"
-#     # url = "https://www.jobkorea.co.kr/Recruit/GI_Read/46921467?Oem_Code=C1&logpath=1&stext=%EB%B0%B1%EC%97%94%EB%93%9C&listno=3&sc=631"
-#     # url = "https://www.jobkorea.co.kr/Recruit/GI_Read/46940600?Oem_Code=C1&logpath=1&stext=%EB%B0%B1%EC%97%94%EB%93%9C&listno=4&sc=631"
-#     url = "https://wefuncorp.career.greetinghr.com/ko/o/91685"
-#     if url:
-#         result = crawl_url(url)
-#         print("=" * 60)
-#         print("결과:")
-#         if result['status'] == 'success':
-#             print(f"사이트: {result['site']}")
-#             print(f"URL: {result['url']}")
-#             print("Raw 데이터:")
-#             print(result['raw_data'])
-#         else:
-#             print(f"오류: {result.get('message', '알 수 없는 오류')}")
-#     else:
-#         print("URL이 입력되지 않았습니다.")
+# 채신 정보들을 50개 정도 크롤링
+def crawl_periodically(url):
+    """일단 웹에서 크롤링할 사이트를 찾아봄"""
+    crawler = JobCrawler()
+    results = []
+
+    # 1. 목록 페이지에서 상세 공고 링크 추출 함수
+    wanted_links = get_wanted_jobs(50)
+   
+    # 2. 공고 페이지 크롤링
+    for url in wanted_links:
+        result = crawler.crawl(url)
+        results.append(result)
+
+    return results
