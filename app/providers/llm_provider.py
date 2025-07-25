@@ -18,6 +18,7 @@ class OpenAIProvider(LLMProviderInterface):
         self,
         model_name: str = settings.OPENAI_MODEL,
         temperature: float = 0.1,
+        max_tokens: int = 4096,
         api_key: Optional[str] = settings.OPENAI_API_KEY,
     ):
         """
@@ -32,7 +33,7 @@ class OpenAIProvider(LLMProviderInterface):
             raise ValueError("OpenAI API 키가 설정되지 않았습니다.")
 
         self.llm = ChatOpenAI(
-            model_name=model_name, temperature=temperature, api_key=api_key, max_tokens=4096, model_kwargs={"response_format": {"type": "json_object"}}
+            model_name=model_name, temperature=temperature, api_key=api_key, max_tokens=max_tokens, model_kwargs={"response_format": {"type": "json_object"}}
         )
         logger.info(f"OpenAI LLM Provider가 다음 모델로 초기화되었습니다: {model_name}")
 

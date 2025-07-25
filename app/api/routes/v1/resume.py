@@ -4,7 +4,7 @@ from app.api.deps import SessionDep, CurrentUser
 from app.schemas.auth import KakaoLoginResponse, UserResponse
 from app.service.auth import auth_service
 from app.service.resume_service import resume_service
-from app.worker.resume_analysis import send_resume_analysis, get_task_status
+from app.worker import resume_analysis
 from pathlib import Path
 from datetime import datetime
 import uuid
@@ -13,8 +13,6 @@ from app.schemas.status import TaskStatus
 from app.utils import storage
 from app.schemas.resume import Keyword
 
-#JobDescription
-from app.worker.job_analysis import send_job_analysis_task 
 from app.schemas.job_description import JobDescriptionRequest, JobTaskStatusResponse, JobAnalysisTaskResponse
 
 
@@ -51,15 +49,14 @@ async def upload_resume(
                 detail="Failed to upload file to storage"
             )
         
-        # Send for analysis
-        send_resume_analysis.send(
+        resume_analysis.send_resume_analysis.send(
             file_url=file_url, 
             original_filename=original_filename,
             upload_filename=upload_filename,
             user_id=current_user.id,
             task_id=task_id,
         )
-        
+
         return AnalysisResponse(
             message="Resume analysis started",
             filename=file.filename,
@@ -84,7 +81,7 @@ async def check_task_status(
     주어진 task_id로 이력서 분석 작업의 상태를 확인합니다.
     """
     try:
-        task_data = get_task_status(task_id)
+        task_data = resume_analysis.get_task_status(task_id)
         return TaskStatusResponse(
             task_id=task_id,
             status=task_data["status"],
