@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from prometheus_client import generate_latest, CONTENT_TYPE_LATEST
 
 from app.api.main import api_router
+import app.worker
 from app.core.config import settings
 from app.monitoring import PrometheusMiddleware, update_system_metrics
 

@@ -12,7 +12,7 @@ class EmbeddingsProvider:
             normalize_embeddings: bool = True
                  ):
         self.model_name = model_name
-        self.device = device or ('cuda' if torch.cuda.is_available() else 'cpu')
+        # self.device = device or ('cuda' if torch.cuda.is_available() else 'cpu')
         self.normalize_embeddings = normalize_embeddings
         self.embeddings_model = self._load_model()
 
@@ -20,7 +20,7 @@ class EmbeddingsProvider:
         try:
             return HuggingFaceEmbeddings(
                 model_name = self.model_name,
-                model_kwargs={"device": self.device},
+                # model_kwargs={"device": self.device},
                 encode_kwargs={"normalize_embeddings": self.normalize_embeddings},
             )
         except Exception as e:

@@ -105,7 +105,7 @@ async def post_test_report_v1(
                 }
             # 4. 결과 DB 저장
             result_id = JinroService().add_test_result(db, current_user.id, result_data)
-            # 5. 최종 결과 반환
+            # 5. 최종 결과 반환5
             return {
                 "success": True,
                 "result_id": result_id,

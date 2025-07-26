@@ -10,3 +10,5 @@ htmlcov
 .env.prod
 .env.local
 datas/cc.ko.300.vec
+.env2
+.ipynb

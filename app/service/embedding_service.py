@@ -2,7 +2,7 @@ import os
 import logging
 import pandas as pd
 from app.repository.embedding_repository import EmbeddingRepository
-from app.service.embedding_provider import EmbeddingsProvider
+from app.providers.embedding_provider import EmbeddingsProvider
 from app.crud.embedding import embedding_crud
 from app.models.embedding import Embedding
 from sqlmodel import Session

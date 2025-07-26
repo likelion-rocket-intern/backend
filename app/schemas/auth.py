@@ -1,6 +1,8 @@
 from typing import Optional
 from pydantic import BaseModel
 from sqlmodel import SQLModel
+from app.schemas.resume import ResumeDetailResponse as ResumeResponse
+from app.schemas.jinro import JinroResponse
 
 class UserInfo(BaseModel):
     """소셜 로그인 사용자 정보의 추상 기본 클래스"""
@@ -26,3 +28,7 @@ class KakaoLoginResponse(SQLModel):
 class UserResponse(BaseModel):
     nickname: str
     email: Optional[str] = None
+
+class UserDetailResponse(UserResponse):
+    resume_list: list[ResumeResponse]
+    jinro_list: list[JinroResponse]

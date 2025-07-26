@@ -158,9 +158,9 @@ class JinroService:
                 detail="해당 결과는 접근 권한이 없습니다."
             )
         return JinroResponse.model_validate(result)
-    
+
     # 유저 아이디 가지고 결과 조회
-    def find_by_user_id(self, db: Session, user_id: int)-> List[JinroResultResponse]:
+    def find_result_by_user_id(self, db: Session, user_id: int)-> List[JinroResultResponse]:
         # TODO 근데 이전 버전 테스트는 우짜지
         jinro = crud_jinro.get_latest_by_user_id(db, user_id)
         if jinro is None:
