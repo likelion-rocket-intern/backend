@@ -11,6 +11,7 @@ on:
       - 'alembic.ini'
       - 'Dockerfile'
       - 'README.md'
+      - 'supervisord.conf'
     branches:
       - 'main'
 jobs:
