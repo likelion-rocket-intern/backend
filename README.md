@@ -10,6 +10,9 @@
 
 [<img src="https://img.shields.io/badge/-readme.md-important?style=flat&logoColor=white" />](https://github.com/likelion-rocket-intern/backend/blob/main/README.md) [![Repository](https://img.shields.io/badge/Repository-%23121011.svg?style=flat&logo=github&logoColor=white)](https://github.com/likelion-rocket-intern/backend) 
 
+<img width="100%" alt="image" src="https://github.com/user-attachments/assets/a05b918c-e1e2-4394-bd59-fb24b9bc277f" />
+
+
 </div>
 
 
