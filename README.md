@@ -230,6 +230,10 @@ flowchart TD
 ## API
 
 <div align="center">
+	
+자세한 사항은 FastAPI Docs를 참고해주세요.
+
+( FastAPI 서버 구동 후 [`http://localhost:8000/docs/`](http://localhost:8000/docs/) )
 
 | **기능** | **메서드** | **엔드포인트** | **설명** |
 | --- | --- | --- | --- |
@@ -249,7 +253,7 @@ flowchart TD
 |  | GET | **`/api/v1/jinro/test-questions-v1`** | 진로 테스트 질문지 조회 (v1) |
 |  | POST | **`/api/v1/jinro/test-report-v1`** | 진로 테스트 결과 제출 (v1) |
 |  | GET | **`/api/v1/jinro/{id}`** | 특정 진로 테스트 결과 ID로 조회 |
-| **JD 분석** | POST | **`/api/v1/jd/{resume_id}/analyze`** | 이력서 기반 JD(채용공고) 분석 요청 |
+| **JD 분석** | POST | **`/api/v1/jd/analyze`** | 이력서 기반 JD(채용공고) 분석 요청 |
 |  | GET | **`/api/v1/jd/task/{task_id}`** | JD 분석 작업 상태 확인 |
 | **크롤러** | GET | **`/api/v1/crawler/`** | 크롤러 정보 조회 (내부용 추정) |
 
