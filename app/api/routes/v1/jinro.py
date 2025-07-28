@@ -134,3 +134,20 @@ async def get_jinro(id: int, current_user:CurrentUser, db:SessionDep):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="해당 id의 결과가 없습니다."
         )
+
+# 진로 검사 결과 상세 조회
+@router.get("/result/{id}")
+async def get_jinro_result(id: int, current_user:CurrentUser, db:SessionDep):
+    """
+    1. id로 진로 검사 결과 조회
+    2. 해당 결과가 현재 유저의 것인지 확인
+    3. 결과 반환
+    """
+    result = JinroService().find_result_by_jinro_Result_id(db, id, current_user.id)
+    if result:
+        return result
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="해당 id의 진로 검사 결과가 없거나 유효하지 않습니다."
+        )

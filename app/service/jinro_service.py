@@ -219,3 +219,13 @@ class JinroService:
         if not jinro_list:
             return []
         return [JinroResponse.model_validate(jinro) for jinro in jinro_list]
+
+    #jinro Result를 가져오기
+    def find_result_by_jinro_Result_id(self, db: Session, jinro_result_id: int, user_id: int) -> JinroResultResponse:
+        jinro_result = crud_jinro_result.get_by_id(db, jinro_result_id)
+        if not jinro_result:
+            raise ValueError("해당 JinroResult ID에 대한 결과가 존재하지 않습니다.")
+        if crud_jinro.get_by_id(db, jinro_result.jinro_id).user_id != user_id:
+            raise ValueError("해당 JinroResult는 현재 유저의 것이 아닙니다.")
+        
+        return JinroResultResponse.model_validate(jinro_result)
