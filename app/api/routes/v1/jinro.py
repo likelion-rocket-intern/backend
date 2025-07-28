@@ -15,7 +15,7 @@ router = APIRouter(tags=["jinro"])
 # 한 유저에 대한 모든 결과값을 조회
 @router.get("/user")
 async def get_jinro_by_user(db:SessionDep, current_user:CurrentUser):
-    return JinroService().find_by_user_id(db, current_user.id)
+    return JinroService().find_by_userid(db, current_user.id)
 
 # 채신 버전 결과만 조회
 @router.get("/user/latest")
