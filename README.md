@@ -102,9 +102,138 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
 ## 아키텍처
 
+```mermaid
+flowchart TD
+    subgraph "클라이언트"
+        C1[브라우저/모바일]:::client
+    end
+
+    subgraph "애플리케이션 계층"
+        direction LR
+        subgraph "API 게이트웨이"
+            A1[FastAPI Service]:::api_gateway
+            A2[내부 라우터]:::api_gateway
+            A3[인증]:::api_gateway
+        end
+
+        subgraph "비즈니스 로직"
+            direction TB
+            S1[Service 계층]:::service_layer
+        end
+
+        subgraph "데이터 접근"
+            D1[CRUD 계층]:::data_access
+            D2[Repository 계층]:::data_access
+        end
+
+        subgraph "모델 & 스키마"
+            M1[Pydantic/SQLModel 모델]:::models_schemas
+            M2[API 스키마]:::models_schemas
+        end
+
+        subgraph "코어 클라이언트"
+            CC1[Postgres Client & 세션]:::core_clients
+            CC2[Redis Client & 큐 설정]:::core_clients
+            CC3[core security/config]:::core_clients
+        end
+
+        subgraph "인터페이스 & Provider"
+            I1[LLM Provider Interface]:::interfaces
+            I2[Embedding Provider Interface]:::interfaces
+            I3[Prompt Generator Interface]:::interfaces
+            I4[이력서 Vector Repository Interface]:::interfaces
+
+            P1[LLM Provider]:::providers
+            P2[Embedding Provider]:::providers
+            P3[Prompt Generator]:::providers
+        end
+
+        subgraph "백그라운드 워커"
+            W1[Dramatiq 워커]:::worker
+        end
+
+        subgraph "유틸리티 모듈"
+            U1[크롤러]:::utilities
+        end
+    end
+
+    subgraph "데이터 저장소 & 캐시"
+        DB1[(PostgreSQL + pgvector)]:::database
+        C2[(Redis)]:::cache_queue
+    end
+
+    subgraph "외부 서비스"
+        E1[소셜 로그인 <br/> Provider]:::external_service
+        E2[LLM 엔드포인트]:::external_service
+    end
+
+    %% 관계 & 상호작용
+    C1 --"HTTP 요청"--> A1
+    A1 --"요청 라우팅"--> A2
+    A2 --"인증 처리"--> A3
+    A3 --"인증 수행"--> E1
+
+    A2 --"위임"--> S1
+    S1 --"동기 작업"--> D1
+    S1 --"동기 작업"--> D2
+    S1 --"사용"--> M1
+    S1 --"사용"--> M2
+    S1 --"사용"--> I1
+    S1 --"사용"--> I2
+    S1 --"사용"--> I3
+    S1 --"사용"--> I4
+    S1 --"사용"--> U1
+    S1 --"태스크 대기열에 추가"--> C2
+
+    D1 --"CRUD 작업"--> DB1
+    D2 --"데이터 접근"--> DB1
+    D2 --"사용"--> I4
+    CC1 --"연결"--> DB1
+    CC2 --"연결"--> C2
+
+    C2 --"트리거"--> W1
+    W1 --"호출"--> P1
+    W1 --"호출"--> P2
+    W1 --"호출"--> P3
+    W1 --"결과 저장"--> DB1
+
+    I1 --"구현"--> P1
+    I2 --"구현"--> P2
+    I3 --"구현"--> P3
+
+    P1 --"호출"--> E2
+    P2 --"호출"--> E2
+    P3 --"호출"--> E2
+
+    W1 --"상태 업데이트"--> A1
+    C1 --"상태 폴링"--> A1
+
+    %% 스타일링
+    classDef client fill:#ADD8E6,stroke:#318CE7,stroke-width:2px;
+    classDef api_gateway fill:#90EE90,stroke:#228B22,stroke-width:2px;
+    classDef service_layer fill:#FFD700,stroke:#DAA520,stroke-width:2px;
+    classDef data_access fill:#DA70D6,stroke:#9370DB,stroke-width:2px;
+    classDef models_schemas fill:#B0E0E6,stroke:#6495ED,stroke-width:2px;
+    classDef core_clients fill:#DDA0DD,stroke:#8B008B,stroke-width:2px;
+    classDef interfaces fill:#FFFF00,stroke:#BDB76B,stroke-width:2px;
+    classDef providers fill:#FFA07A,stroke:#FF8C00,stroke-width:2px;
+    classDef worker fill:#FF6347,stroke:#CD5C5C,stroke-width:2px;
+    classDef utilities fill:#AFEEEE,stroke:#40E0D0,stroke-width:2px;
+    classDef database fill:#87CEEB,stroke:#4682B4,stroke-width:2px;
+    classDef cache_queue fill:#FFDAB9,stroke:#F4A460,stroke-width:2px;
+    classDef external_service fill:#FFC0CB,stroke:#FF69B4,stroke-width:2px;
+    classDef observability fill:#D3D3D3,stroke:#A9A9A9,stroke-width:2px;
+    classDef infra_code fill:#C0C0C0,stroke:#808080,stroke-width:2px;
+
+
+```
 ## API
 
 <div align="center">
+	
+자세한 사항은 FastAPI Docs를 참고해주세요.
+
+( FastAPI 서버 구동 후 [`http://localhost:8000/docs/`](http://localhost:8000/docs/) )
 
 | **기능** | **메서드** | **엔드포인트** | **설명** |
 | --- | --- | --- | --- |
@@ -124,7 +253,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 |  | GET | **`/api/v1/jinro/test-questions-v1`** | 진로 테스트 질문지 조회 (v1) |
 |  | POST | **`/api/v1/jinro/test-report-v1`** | 진로 테스트 결과 제출 (v1) |
 |  | GET | **`/api/v1/jinro/{id}`** | 특정 진로 테스트 결과 ID로 조회 |
-| **JD 분석** | POST | **`/api/v1/jd/{resume_id}/analyze`** | 이력서 기반 JD(채용공고) 분석 요청 |
+| **JD 분석** | POST | **`/api/v1/jd/analyze`** | 이력서 기반 JD(채용공고) 분석 요청 |
 |  | GET | **`/api/v1/jd/task/{task_id}`** | JD 분석 작업 상태 확인 |
 | **크롤러** | GET | **`/api/v1/crawler/`** | 크롤러 정보 조회 (내부용 추정) |
 
