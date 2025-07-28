@@ -41,7 +41,7 @@ class Settings(BaseSettings):
 
     #https://api.ai-resume.kknaks.site
     BACKEND_HOST: str = os.getenv("BACKEND_HOST", "http://localhost:8000")
-    USE_HTTPS: bool = os.getenv("USE_HTTPS", "false").lower() == "true"
+    USE_HTTPS: bool = os.getenv("USE_HTTPS", "false").lower() == "false"
     COOKIE_DOMAIN: str = os.getenv("COOKIE_DOMAIN", "kknaks.site")
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
