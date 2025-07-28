@@ -26,6 +26,9 @@ class CRUDUser:
         db.refresh(user)
         return user
 
+    def get_by_id(self, db: Session, user_id: int) -> User:
+        return db.query(User).filter(User.id == user_id).first()
+
 user_crud = CRUDUser()
 
 

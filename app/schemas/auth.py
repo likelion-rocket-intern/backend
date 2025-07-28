@@ -30,5 +30,9 @@ class UserResponse(BaseModel):
     email: Optional[str] = None
 
 class UserDetailResponse(UserResponse):
+    id: int
+    nickname: str
+    email: str | None
+    profile_image: Optional[str] = None
     resume_list: list[ResumeResponse]
     jinro_list: list[JinroResponse]
