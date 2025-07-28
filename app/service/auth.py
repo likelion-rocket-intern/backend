@@ -76,15 +76,6 @@ class AuthService:
         user = user_crud.get_by_id(db, user_id)
         resume_list = resume_crud.get_by_user_id(db, user_id)
         jinro_list = crud_jinro.get_by_userid(db, user_id)
-
-
-                # 디버깅 로그 추가
-        print(f"=== User 디버깅 ===")
-        print(f"User ID: {user.id}")
-        print(f"Nickname: {user.nickname}")
-        print(f"Email: {user.email}")
-        print(f"Profile Image: {user.profile_image}")
-        print(f"Profile Image type: {type(user.profile_image)}")
         
         return UserDetailResponse(
             id=user.id,
