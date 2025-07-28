@@ -8,7 +8,8 @@
 수강생의 이력서를 AI가 분석하여 역량 기반 정량 평가 및 인사담당자의 성향에 맞는 인재 추천 서비스
 
 
-[<img src="https://img.shields.io/badge/-readme.md-important?style=flat&logoColor=white" />](https://github.com/likelion-rocket-intern/backend/blob/main/README.md) [![Repository](https://img.shields.io/badge/Repository-%23121011.svg?style=flat&logo=github&logoColor=white)](https://github.com/likelion-rocket-intern/backend) 
+[<img src="https://img.shields.io/badge/-readme.md-important?style=flat&logoColor=white" />](https://github.com/ocy-likelion/AI_resume_1_backend/blob/main/README.md) [![Repository](https://img.shields.io/badge/Repository-%23121011.svg?style=flat&logo=github&logoColor=white)](https://github.com/ocy-likelion/AI_resume_1_backend) [![tech_fit deploy](https://github.com/likelion-rocket-intern/backend/actions/workflows/deploy.yml/badge.svg)](https://github.com/likelion-rocket-intern/backend/actions/workflows/deploy.yml)
+ 
 
 <img width="100%" alt="image" src="https://github.com/user-attachments/assets/a05b918c-e1e2-4394-bd59-fb24b9bc277f" />
 

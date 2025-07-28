@@ -10,7 +10,7 @@ python app/backend_pre_start.py
 alembic upgrade head
 
 # Finally initialize embeddings
-python app/backend_pre_embed.py
+# python app/backend_pre_embed.py
 
 # Create initial data in DB
 # python app/initial_data.py
