@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import Response, RedirectResponse
 from app.api.deps import SessionDep, CurrentUser
-from app.schemas.auth import KakaoLoginResponse, UserResponse
+from app.schemas.auth import KakaoLoginResponse, UserDetailResponse
 from app.service.auth import auth_service
 from app.core.config import settings
 
@@ -58,5 +58,8 @@ async def logout(
     return {"message": "Logout successful"}
 
 @router.get("/me")
-async def get_me(current_user:CurrentUser) -> UserResponse:
+async def get_me(current_user:CurrentUser, session: SessionDep) -> UserDetailResponse:
+
+    current_user = auth_service.get_user_detail(session, current_user.id)
+
     return current_user

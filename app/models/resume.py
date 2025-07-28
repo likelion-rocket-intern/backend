@@ -9,6 +9,12 @@ from pgvector.sqlalchemy import Vector
 if TYPE_CHECKING:
     from .user import User
 
+
+class ResumeJobDescriptionLink(SQLModel, table=True):
+    __tablename__ = "resume_job_description_links"
+    resume_id: int = Field(foreign_key="resumes.id", primary_key=True)
+    job_description_id: int = Field(foreign_key="job_descriptions.id", primary_key=True)
+
 class Resume(SQLModel, table=True):
     __tablename__ = "resumes"
 
@@ -32,6 +38,11 @@ class Resume(SQLModel, table=True):
     resume_keywords: List["ResumeKeyword"] = Relationship(
         back_populates="resume",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
+    
+    job_descriptions: List["JobDescription"] = Relationship(
+        back_populates="resumes",
+        link_model=ResumeJobDescriptionLink
     )
 
 class ResumeKeyword(SQLModel, table=True):
