@@ -44,45 +44,94 @@ def get_current_user(
     refresh_token: RefreshTokenDep,
     response: Response
 ) -> User:
+    print("=== Debug Token Info ===")
+    print(f"Access Token: {access_token}")
+    print(f"Refresh Token: {refresh_token}")
+    print("=====================")
+    
+    # 토큰이 둘 다 없으면 인증되지 않음
     if not access_token and not refresh_token:
+        print("No tokens provided")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated",
         )
     
-    print("=== Debug Token Info ===")
-    print(f"Access Token: {access_token}")
-    print(f"Refresh Token: {refresh_token}")
-    print("=====================")
-        
-    try:
-        return security.verify_token(access_token, session)
-    except HTTPException as e:
-        print(f"=== Token Verification Error ===")
-        print(f"Error: {str(e.detail)}")
-        print("===============================")
-        if e.status_code == status.HTTP_403_FORBIDDEN and refresh_token:
-            try:
-                # Validate refresh token
-                user = security.verify_token(refresh_token, session)
-                # Create new access token with full user info
-                new_access_token = create_new_access_token(user)
-                # Set new access token in cookie
-                response.set_cookie(
-                    key="access_token",
-                    value=new_access_token,
-                    httponly=True,
-                    secure=True,
-                    samesite="lax",
-                    max_age=30 * 60  # 30분
-                )
-                return user
-            except HTTPException:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Both access token and refresh token are invalid",
-                )
-        raise e
+    # Access token이 있으면 먼저 검증 시도
+    if access_token:
+        try:
+            print("Verifying access token...")
+            user = security.verify_token(access_token, session)
+            print("Access token is valid")
+            return user
+        except HTTPException as e:
+            print(f"=== Access Token Verification Error ===")
+            print(f"Error: {str(e.detail)}")
+            print(f"Status Code: {e.status_code}")
+            print("=====================================")
+            
+            # Access token이 만료되었거나 유효하지 않은 경우
+            # 401 (만료) 또는 403 (유효하지 않음) 모두 refresh token으로 시도
+            if refresh_token and e.status_code in [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN]:
+                print("Attempting to refresh token...")
+                try:
+                    # Refresh token 검증
+                    user = security.verify_token(refresh_token, session)
+                    print("Refresh token is valid, creating new access token...")
+                    
+                    # 새로운 access token 생성
+                    new_access_token = create_new_access_token(user)
+                    
+                    # 새로운 access token을 쿠키에 설정
+                    response.set_cookie(
+                        key="access_token",
+                        value=new_access_token,
+                        httponly=True,
+                        secure=True,
+                        samesite="lax",
+                        max_age= 30 * 60
+                    )
+                    print("=== New Access Token Created ===")
+                    print(f"New token: {new_access_token[:50]}...")
+                    return user
+                    
+                except HTTPException as refresh_error:
+                    print(f"=== Refresh Token Verification Error ===")
+                    print(f"Error: {str(refresh_error.detail)}")
+                    print("======================================")
+                    # Refresh token도 유효하지 않음
+                    raise HTTPException(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        detail="Both access token and refresh token are invalid",
+                    )
+            else:
+                # Refresh token이 없거나 다른 에러인 경우 원래 에러를 그대로 던짐
+                raise e
+    
+    # Access token이 없고 refresh token만 있는 경우
+    elif refresh_token:
+        print("No access token, trying refresh token...")
+        try:
+            user = security.verify_token(refresh_token, session)
+            new_access_token = create_new_access_token(user)
+            
+            response.set_cookie(
+                key="access_token",
+                value=new_access_token,
+                httponly=True,
+                secure=True,
+                samesite="lax",
+                max_age=30 * 60
+            )
+            print("Created new access token from refresh token")
+            return user
+            
+        except HTTPException:
+            print("Refresh token is invalid")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh token is invalid",
+            )
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
