@@ -212,3 +212,10 @@ class JinroService:
             result["rank"] = i + 1
         
         return results
+
+    def find_by_userid(self, db: Session, user_id: int) -> List[JinroResponse]:
+
+        jinro_list = crud_jinro.get_by_userid(db, user_id)
+        if not jinro_list:
+            return []
+        return [JinroResponse.model_validate(jinro) for jinro in jinro_list]
