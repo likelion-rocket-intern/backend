@@ -75,6 +75,12 @@ class ServiceManager:
             f"-v /dockerProjects/resume_matching/datas:/app/datas "
             f"--restart unless-stopped -p {port}:18000 -e TZ=Asia/Seoul "
             f"--pull always ghcr.io/likelion-rocket-intern/ai-resume")
+        print(f"Checking logs for {name} after startup attempt...")
+        log_command = f"docker logs {name} --tail 100"
+        app_logs = self._run_command(log_command)
+        print("--- FastAPI Container Logs ---")
+        print(app_logs)
+        print("--- End of FastAPI Container Logs ---")
 
     def _switch_port(self) -> None:
         # Socat 포트를 전환하는 함수
