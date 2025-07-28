@@ -21,7 +21,7 @@ class ModelLoaderMiddleware(Middleware):
             from app.service.resume_service import resume_service
             try:
                 logger.info("Loading models in worker master process...")
-                resume_service.load_models()
+                # resume_service.load_models()
                 logger.info("Successfully loaded models in worker master process")
                 self.loaded = True
             except Exception as e:
