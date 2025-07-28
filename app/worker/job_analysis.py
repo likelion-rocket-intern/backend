@@ -100,8 +100,7 @@ def get_task_status(message_id: str) -> dict:
 @dramatiq.actor(queue_name="job_analysis", time_limit=300_000, max_retries=1) 
 def send_job_analysis_task(
 	task_id: str, 
-	user_id: int, 
-	resume_id: int, 
+	user_id: int,  
 	job_request: dict
 	):
 	"""

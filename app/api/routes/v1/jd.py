@@ -13,9 +13,8 @@ from app.worker import job_analysis
 router = APIRouter(tags=["jd"])
 
 #JobDescription
-@router.post("/{resume_id}/analyze", response_model=JobAnalysisTaskResponse)
+@router.post("/analyze", response_model=JobAnalysisTaskResponse)
 async def request_job_analysis(
-    resume_id: int,
     job_description_request: JobDescriptionRequest,
     current_user: CurrentUser,
 ) -> JobAnalysisTaskResponse:
@@ -28,7 +27,6 @@ async def request_job_analysis(
         job_analysis.send_job_analysis_task.send(
             task_id=task_id,
             user_id=current_user.id,
-            resume_id=resume_id,
             job_request=job_description_request.model_dump()
         )
 
